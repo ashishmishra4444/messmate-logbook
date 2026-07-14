@@ -43,6 +43,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,7 +77,7 @@ function MembersPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [today, setToday] = useState<Date>(new Date());
-  const [viewMeal, setViewMeal] = useState<"breakfast" | "lunch" | "dinner">("lunch");
+  const [viewMeal, setViewMeal] = useState<"breakfast" | "lunch" | "dinner" | "all">("all");
   const [viewMonth, setViewMonth] = useState<Date>(() => {
     const d = new Date();
     d.setDate(1);
@@ -228,17 +234,40 @@ function MembersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const isEligible = (plan: string, meal: "breakfast" | "lunch" | "dinner") => {
+    if (plan === "all") return true;
+    return plan.includes(meal);
+  };
+
   const markAllPresent = useMutation({
     mutationFn: async () => {
       const iso = formatDateISO(today);
-      const rows = members.map((m) => ({
-        member_id: m.id,
-        date: iso,
-        lunch_status: (m.meal_plan === "dinner" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_dinner" ? "not_marked" : "present") as Status,
-        dinner_status: (m.meal_plan === "lunch" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_lunch" ? "not_marked" : "present") as Status,
-        breakfast_status: (m.meal_plan.includes("breakfast") || m.meal_plan === "all" ? "present" : "not_marked") as Status,
-        updated_at: new Date().toISOString(),
-      }));
+
+      const { data: existing = [] } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("date", iso);
+
+      const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
+
+      const rows = members.map((m) => {
+        const exist = existingMap.get(m.id);
+
+        return {
+          member_id: m.id,
+          date: iso,
+          breakfast_status: (viewMeal === "breakfast" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "breakfast") ? "present" as Status : "not_marked" as Status)
+            : (exist?.breakfast_status || "not_marked" as Status),
+          lunch_status: (viewMeal === "lunch" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "lunch") ? "present" as Status : "not_marked" as Status)
+            : (exist?.lunch_status || "not_marked" as Status),
+          dinner_status: (viewMeal === "dinner" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "dinner") ? "present" as Status : "not_marked" as Status)
+            : (exist?.dinner_status || "not_marked" as Status),
+          updated_at: new Date().toISOString(),
+        };
+      });
 
       const { error } = await supabase
         .from("attendance")
@@ -246,7 +275,87 @@ function MembersPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("All members marked present for today");
+      toast.success(`All members marked present for ${viewMeal}`);
+      qc.invalidateQueries({ queryKey: ["attendance"] });
+      qc.invalidateQueries({ queryKey: ["attendance-all"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const markAllAbsent = useMutation({
+    mutationFn: async () => {
+      const iso = formatDateISO(today);
+
+      const { data: existing = [] } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("date", iso);
+
+      const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
+
+      const rows = members.map((m) => {
+        const exist = existingMap.get(m.id);
+
+        return {
+          member_id: m.id,
+          date: iso,
+          breakfast_status: (viewMeal === "breakfast" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "breakfast") ? "absent" as Status : "not_marked" as Status)
+            : (exist?.breakfast_status || "not_marked" as Status),
+          lunch_status: (viewMeal === "lunch" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "lunch") ? "absent" as Status : "not_marked" as Status)
+            : (exist?.lunch_status || "not_marked" as Status),
+          dinner_status: (viewMeal === "dinner" || viewMeal === "all")
+            ? (isEligible(m.meal_plan, "dinner") ? "absent" as Status : "not_marked" as Status)
+            : (exist?.dinner_status || "not_marked" as Status),
+          updated_at: new Date().toISOString(),
+        };
+      });
+
+      const { error } = await supabase
+        .from("attendance")
+        .upsert(rows, { onConflict: "member_id,date" });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(`All members marked absent for ${viewMeal}`);
+      qc.invalidateQueries({ queryKey: ["attendance"] });
+      qc.invalidateQueries({ queryKey: ["attendance-all"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const clearAllMarks = useMutation({
+    mutationFn: async () => {
+      const iso = formatDateISO(today);
+
+      const { data: existing = [] } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("date", iso);
+
+      const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
+
+      const rows = members.map((m) => {
+        const exist = existingMap.get(m.id);
+
+        return {
+          member_id: m.id,
+          date: iso,
+          breakfast_status: (viewMeal === "breakfast" || viewMeal === "all") ? "not_marked" as Status : (exist?.breakfast_status || "not_marked" as Status),
+          lunch_status: (viewMeal === "lunch" || viewMeal === "all") ? "not_marked" as Status : (exist?.lunch_status || "not_marked" as Status),
+          dinner_status: (viewMeal === "dinner" || viewMeal === "all") ? "not_marked" as Status : (exist?.dinner_status || "not_marked" as Status),
+          updated_at: new Date().toISOString(),
+        };
+      });
+
+      const { error } = await supabase
+        .from("attendance")
+        .upsert(rows, { onConflict: "member_id,date" });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(`Attendance cleared for ${viewMeal}`);
       qc.invalidateQueries({ queryKey: ["attendance"] });
       qc.invalidateQueries({ queryKey: ["attendance-all"] });
     },
@@ -322,7 +431,7 @@ function MembersPage() {
             </PopoverContent>
           </Popover>
 
-          <Tabs value={viewMeal} onValueChange={(v) => setViewMeal(v as "breakfast" | "lunch" | "dinner")}>
+          <Tabs value={viewMeal} onValueChange={(v) => setViewMeal(v as "breakfast" | "lunch" | "dinner" | "all")}>
             <TabsList className="bg-muted">
               <TabsTrigger
                 value="breakfast"
@@ -345,6 +454,13 @@ function MembersPage() {
                 <Sandwich className="h-4 w-4" />
                 Dinner
               </TabsTrigger>
+              <TabsTrigger
+                value="all"
+                className="gap-1.5 data-[state=active]:text-primary"
+              >
+                <CheckCheck className="h-4 w-4" />
+                All
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -355,9 +471,29 @@ function MembersPage() {
           >
             <CheckCheck className="h-4 w-4" /> Mark All Present
           </Button>
-          <Button variant="outline" size="icon">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" disabled={members.length === 0}>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                className="text-rose-500 focus:text-rose-600 focus:bg-rose-500/10 cursor-pointer gap-2"
+                onClick={() => markAllAbsent.mutate()}
+                disabled={markAllAbsent.isPending}
+              >
+                <X className="h-4 w-4" /> Mark All Absent
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer gap-2"
+                onClick={() => clearAllMarks.mutate()}
+                disabled={clearAllMarks.isPending}
+              >
+                <Minus className="h-4 w-4" /> Clear Today's Marks
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -466,33 +602,47 @@ function MembersPage() {
             <>
               {/* Header */}
               <div className="grid grid-cols-1 gap-4 border-b border-border p-5 xl:grid-cols-[minmax(240px,1fr)_auto]">
-                <div className="flex min-w-0 items-start gap-4">
-                  <Avatar className="h-14 w-14 shrink-0">
-                    <AvatarFallback className={cn("text-base font-bold", avatarColor(selected.id))}>
-                      {initials(selected.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="truncate text-xl font-bold">{selected.name}</div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5" />
-                        {selected.mobile}
-                      </span>
-                      <span>Room No. {selected.room_number}</span>
-                    </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      Member Since:{" "}
-                      {new Date(selected.join_date).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
-                        <Utensils className="h-3 w-3" /> {selected.meal_plan}
-                      </span>
+                <div className="flex min-w-0 items-start justify-between gap-4 w-full">
+                  <div className="flex min-w-0 items-start gap-4">
+                    <Avatar className="h-14 w-14 shrink-0">
+                      <AvatarFallback className={cn("text-base font-bold", avatarColor(selected.id))}>
+                        {initials(selected.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="truncate text-xl font-bold">{selected.name}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Phone className="h-3.5 w-3.5" />
+                          {selected.mobile}
+                        </span>
+                        <span>Room No. {selected.room_number}</span>
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        Member Since:{" "}
+                        {new Date(selected.join_date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                        <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
+                          <Utensils className="h-3 w-3" /> {selected.meal_plan}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 border-rose-200 shrink-0"
+                    onClick={() => {
+                      setSelectedIds([selected.id]);
+                      setConfirmDeleteOpen(true);
+                    }}
+                    title="Delete Member"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-5 w-full max-w-[580px]">
                   <StatCard
