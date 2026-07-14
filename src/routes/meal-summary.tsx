@@ -17,19 +17,11 @@ function DashboardSummary() {
     queryFn: async () => {
       const { data } = await supabase
         .from("attendance")
-        .select("lunch_status, dinner_status, member_id, members(name, room_number, meal_plan)")
+        .select("breakfast_status, lunch_status, dinner_status, member_id, members(name, room_number, meal_plan)")
         .gte("date", monthStart)
         .lte("date", monthEnd);
 
-      return (data ?? []).map((r: any) => {
-        if (r.member_id) {
-          const localPlan = localStorage.getItem(`messmate.member_meal_plan.${r.member_id}`);
-          if (localPlan && r.members) {
-            r.members.meal_plan = localPlan;
-          }
-        }
-        return r;
-      });
+      return data ?? [];
     },
   });
 
@@ -37,26 +29,17 @@ function DashboardSummary() {
   rows.forEach((r: any) => {
     const k = r.member_id;
     if (!map.has(k)) {
-      let breakfast = 0;
-      const startD = new Date(monthStart);
-      const endD = new Date(monthEnd);
-      for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
-        const iso = formatDateISO(d);
-        const val = localStorage.getItem(`messmate.attendance_breakfast.${k}_${iso}`);
-        if (val === "present") {
-          breakfast++;
-        }
-      }
       map.set(k, {
         name: r.members?.name ?? "",
         room: r.members?.room_number ?? "",
         plan: r.members?.meal_plan ?? "",
-        breakfast,
+        breakfast: 0,
         lunch: 0,
         dinner: 0
       });
     }
     const cur = map.get(k)!;
+    if (r.breakfast_status === "present") cur.breakfast++;
     if (r.lunch_status === "present") cur.lunch++;
     if (r.dinner_status === "present") cur.dinner++;
   });

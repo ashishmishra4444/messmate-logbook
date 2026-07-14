@@ -90,10 +90,7 @@ function MembersPage() {
         .select("*")
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return (data as Member[]).map((m) => {
-        const localPlan = localStorage.getItem(`messmate.member_meal_plan.${m.id}`);
-        return localPlan ? { ...m, meal_plan: localPlan as any } : m;
-      });
+      return data as Member[];
     },
   });
 
@@ -155,26 +152,15 @@ function MembersPage() {
   });
 
   const stats = useMemo(() => {
-    let breakfastDays = 0;
-    if (selectedId) {
-      const prefix = `messmate.attendance_breakfast.${selectedId}_`;
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(prefix)) {
-          const val = localStorage.getItem(key);
-          if (val === "present") breakfastDays++;
-        }
-      }
-    }
+    const breakfastDays = allAttendance.filter((a) => a.breakfast_status === "present").length;
     const lunchDays = allAttendance.filter((a) => a.lunch_status === "present").length;
     const dinnerDays = allAttendance.filter((a) => a.dinner_status === "present").length;
     const total = breakfastDays + lunchDays + dinnerDays;
     const possible = allAttendance.reduce((acc, a) => {
       if (!selected) return acc;
       const plan = selected.meal_plan;
-      const localBreakfastStatus = localStorage.getItem(`messmate.attendance_breakfast.${selected.id}_${a.date}`);
       
-      const breakfastMarked = (plan.includes("breakfast") || plan === "all") && localBreakfastStatus !== "not_marked" ? 1 : 0;
+      const breakfastMarked = (plan.includes("breakfast") || plan === "all") && a.breakfast_status !== "not_marked" ? 1 : 0;
       const lunchMarked = (plan.includes("lunch") || plan === "all") && a.lunch_status !== "not_marked" ? 1 : 0;
       const dinnerMarked = (plan.includes("dinner") || plan === "all") && a.dinner_status !== "not_marked" ? 1 : 0;
 
@@ -187,50 +173,35 @@ function MembersPage() {
     }, 0);
     const present = allAttendance.reduce((acc, a) => {
       if (!selected) return acc;
-      const localBreakfastStatus = localStorage.getItem(`messmate.attendance_breakfast.${selected.id}_${a.date}`);
       return (
         acc +
-        ((selected.meal_plan.includes("breakfast") || selected.meal_plan === "all") && localBreakfastStatus === "present" ? 1 : 0) +
+        ((selected.meal_plan.includes("breakfast") || selected.meal_plan === "all") && a.breakfast_status === "present" ? 1 : 0) +
         ((selected.meal_plan.includes("lunch") || selected.meal_plan === "all") && a.lunch_status === "present" ? 1 : 0) +
         ((selected.meal_plan.includes("dinner") || selected.meal_plan === "all") && a.dinner_status === "present" ? 1 : 0)
       );
     }, 0);
     const pct = possible > 0 ? Math.round((present / possible) * 100) : 0;
     return { breakfastDays, lunchDays, dinnerDays, total, pct };
-  }, [allAttendance, selected, selectedId]);
+  }, [allAttendance, selected]);
 
   // Build month rows
   const monthRows = useMemo(() => {
-    const rows: { date: Date; iso: string; record?: Attendance & { breakfast_status?: Status } }[] = [];
+    const rows: { date: Date; iso: string; record?: Attendance }[] = [];
     const d = new Date(viewMonth);
     d.setDate(1);
     const m = d.getMonth();
     while (d.getMonth() === m) {
       const iso = formatDateISO(d);
       const record = monthAttendance.find((a) => a.date === iso);
-      const localBreakfastStatus = selectedId ? localStorage.getItem(`messmate.attendance_breakfast.${selectedId}_${iso}`) : null;
       rows.push({
         date: new Date(d),
         iso,
-        record: record ? {
-          ...record,
-          breakfast_status: (localBreakfastStatus || "not_marked") as Status
-        } : (localBreakfastStatus ? {
-          id: "",
-          member_id: selectedId || "",
-          date: iso,
-          lunch_status: "not_marked" as Status,
-          dinner_status: "not_marked" as Status,
-          remarks: "",
-          created_at: "",
-          updated_at: "",
-          breakfast_status: localBreakfastStatus as Status
-        } : undefined)
+        record,
       });
       d.setDate(d.getDate() + 1);
     }
     return rows;
-  }, [viewMonth, monthAttendance, selectedId]);
+  }, [viewMonth, monthAttendance]);
 
   const setMark = useMutation({
     mutationFn: async (vars: {
@@ -239,40 +210,16 @@ function MembersPage() {
       field: "breakfast_status" | "lunch_status" | "dinner_status";
       value: Status;
     }) => {
-      if (vars.field === "breakfast_status") {
-        localStorage.setItem(`messmate.attendance_breakfast.${vars.memberId}_${vars.date}`, vars.value);
-        const { data: existing } = await supabase
-          .from("attendance")
-          .select("lunch_status, dinner_status")
-          .eq("member_id", vars.memberId)
-          .eq("date", vars.date)
-          .maybeSingle();
-
-        const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
-          member_id: vars.memberId,
-          date: vars.date,
-          updated_at: new Date().toISOString(),
-          lunch_status: existing?.lunch_status ?? ("not_marked" as Status),
-          dinner_status: existing?.dinner_status ?? ("not_marked" as Status),
-        };
-        const { error } = await supabase
-          .from("attendance")
-          .upsert(payload, { onConflict: "member_id,date" });
-        if (error) throw error;
-      } else {
-        const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
-          member_id: vars.memberId,
-          date: vars.date,
-          updated_at: new Date().toISOString(),
-          ...(vars.field === "lunch_status"
-            ? { lunch_status: vars.value }
-            : { dinner_status: vars.value }),
-        };
-        const { error } = await supabase
-          .from("attendance")
-          .upsert(payload, { onConflict: "member_id,date" });
-        if (error) throw error;
-      }
+      const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
+        member_id: vars.memberId,
+        date: vars.date,
+        updated_at: new Date().toISOString(),
+        [vars.field]: vars.value,
+      };
+      const { error } = await supabase
+        .from("attendance")
+        .upsert(payload, { onConflict: "member_id,date" });
+      if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["attendance"] });
@@ -289,15 +236,9 @@ function MembersPage() {
         date: iso,
         lunch_status: (m.meal_plan === "dinner" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_dinner" ? "not_marked" : "present") as Status,
         dinner_status: (m.meal_plan === "lunch" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_lunch" ? "not_marked" : "present") as Status,
+        breakfast_status: (m.meal_plan.includes("breakfast") || m.meal_plan === "all" ? "present" : "not_marked") as Status,
         updated_at: new Date().toISOString(),
       }));
-
-      members.forEach((m) => {
-        const eligibleForBreakfast = m.meal_plan.includes("breakfast") || m.meal_plan === "all";
-        if (eligibleForBreakfast) {
-          localStorage.setItem(`messmate.attendance_breakfast.${m.id}_${iso}`, "present");
-        }
-      });
 
       const { error } = await supabase
         .from("attendance")
@@ -930,43 +871,22 @@ function AddMemberDialog({
 
     setSaving(true);
 
-    let dbPlan: "lunch" | "dinner" | "both" = "both";
-    if (form.meal_plan === "lunch") {
-      dbPlan = "lunch";
-    } else if (form.meal_plan === "dinner") {
-      dbPlan = "dinner";
-    } else if (form.meal_plan === "breakfast") {
-      dbPlan = "lunch";
-    } else if (form.meal_plan === "breakfast_lunch") {
-      dbPlan = "lunch";
-    } else if (form.meal_plan === "breakfast_dinner") {
-      dbPlan = "dinner";
-    } else if (form.meal_plan === "lunch_dinner") {
-      dbPlan = "both";
-    } else if (form.meal_plan === "all") {
-      dbPlan = "both";
-    }
-
     const { data, error } = await supabase
       .from("members")
       .insert({
         name: form.name.trim(),
         mobile: form.mobile,
         room_number: form.room_number,
-        meal_plan: dbPlan,
+        meal_plan: form.meal_plan as any,
         member_code: form.member_code.trim() || null,
         id_proof_type: form.id_proof_type,
         id_proof_number: form.id_proof_number.trim(),
-      } as any)
+      })
       .select("id")
       .single();
 
     setSaving(false);
     if (error) return toast.error(error.message);
-
-    if (data?.id) {
-      localStorage.setItem(`messmate.member_meal_plan.${data.id}`, form.meal_plan);
-    }
 
     toast.success("Member added");
     reset();

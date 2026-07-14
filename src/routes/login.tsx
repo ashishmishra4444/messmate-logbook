@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -19,8 +20,9 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) {
       toast.error("Please fill in all required fields.");
@@ -28,10 +30,32 @@ function LoginPage() {
     }
 
     setLoading(true);
-    localStorage.setItem("isLoggedIn", "true");
-    toast.success("Welcome to MessMate!");
-    setLoading(false);
-    navigate({ to: "/dashboard" });
+    try {
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        
+        toast.success("Account created successfully! You can now log in.");
+        setIsSignUp(false);
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+
+        localStorage.setItem("isLoggedIn", "true");
+        toast.success("Welcome to MessMate!");
+        navigate({ to: "/dashboard" });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred during authentication.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,10 +66,10 @@ function LoginPage() {
             <ChefHat className="h-6 w-6" />
           </div>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
-            Sign in to MessMate
+            {isSignUp ? "Create an account" : "Sign in to MessMate"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage your mess kitchen and attendance
+            {isSignUp ? "Register your admin user credentials" : "Manage your mess kitchen and attendance"}
           </p>
         </div>
 
@@ -106,10 +130,21 @@ function LoginPage() {
             disabled={loading}
             className="w-full h-11 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-md transition-all"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Processing..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
         </form>
+
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors"
+          >
+            {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+

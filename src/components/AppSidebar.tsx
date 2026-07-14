@@ -57,12 +57,19 @@ const items = [
   { title: "Backup & Export", url: "/backup", icon: Database },
 ];
 
+import { supabase } from "@/integrations/supabase/client";
+
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
   const isActive = (url: string) => pathname === url || (url === "/members" && pathname === "/");
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Error signing out from Supabase:", e);
+    }
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("theme");
     localStorage.removeItem("messmate.profile");

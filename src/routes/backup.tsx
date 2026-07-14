@@ -31,12 +31,11 @@ function BackupPage() {
     if (error) return toast.error(error.message);
     const rows: (string | Date)[][] = [["Name", "Mobile", "Room", "Plan", "Join Date"]];
     ((data ?? []) as Member[]).filter(isValidMember).forEach((m) => {
-      const localPlan = localStorage.getItem(`messmate.member_meal_plan.${m.id}`) || m.meal_plan;
       rows.push([
         m.name.trim(),
         String(m.mobile).trim(),
         m.room_number.trim(),
-        localPlan,
+        m.meal_plan,
         parseJoinDate(m.join_date),
       ]);
     });
@@ -45,20 +44,17 @@ function BackupPage() {
   const exportAttendance = async () => {
     const { data, error } = await supabase
       .from("attendance")
-      .select("date, lunch_status, dinner_status, remarks, member_id, members(name, room_number)");
+      .select("date, breakfast_status, lunch_status, dinner_status, remarks, member_id, members(name, room_number)");
     if (error) return toast.error(error.message);
     const rows: (string | number)[][] = [
       ["Date", "Member", "Room", "Breakfast", "Lunch", "Dinner", "Remarks"],
     ];
-    ((data ?? []) as AttendanceExportRow[]).forEach((r) => {
-      const localBreakfastStatus = r.member_id
-        ? localStorage.getItem(`messmate.attendance_breakfast.${r.member_id}_${r.date}`)
-        : "not_marked";
+    ((data ?? []) as any[]).forEach((r) => {
       rows.push([
         r.date,
-        r.members?.name,
-        r.members?.room_number,
-        localBreakfastStatus || "not_marked",
+        r.members?.name ?? "",
+        r.members?.room_number ?? "",
+        r.breakfast_status || "not_marked",
         r.lunch_status,
         r.dinner_status,
         r.remarks ?? "",

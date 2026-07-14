@@ -23,24 +23,15 @@ function ReportsPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("attendance")
-        .select("date, lunch_status, dinner_status, remarks, members(id, name, room_number, meal_plan)")
+        .select("date, lunch_status, dinner_status, breakfast_status, remarks, members(id, name, room_number, meal_plan)")
         .gte("date", monthStart)
         .lte("date", monthEnd)
         .order("date", { ascending: false });
 
-      return (data ?? []).map((r: any) => {
-        if (r.members) {
-          const localPlan = localStorage.getItem(`messmate.member_meal_plan.${r.members.id}`);
-          if (localPlan) {
-            r.members.meal_plan = localPlan;
-          }
-        }
-        const localBreakfastStatus = r.members?.id ? localStorage.getItem(`messmate.attendance_breakfast.${r.members.id}_${r.date}`) : null;
-        return {
-          ...r,
-          breakfast_status: (localBreakfastStatus || "not_marked") as Status
-        };
-      });
+      return (data ?? []).map((r: any) => ({
+        ...r,
+        breakfast_status: r.breakfast_status || "not_marked"
+      }));
     },
   });
 

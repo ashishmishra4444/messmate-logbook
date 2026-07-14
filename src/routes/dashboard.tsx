@@ -48,10 +48,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.from("members").select("*");
       if (error) throw error;
-      return (data ?? []).map((m) => {
-        const localPlan = localStorage.getItem(`messmate.member_meal_plan.${m.id}`);
-        return localPlan ? { ...m, meal_plan: localPlan as Member["meal_plan"] } : m;
-      });
+      return data ?? [];
     },
   });
 
@@ -100,24 +97,14 @@ function Dashboard() {
     },
   });
 
-  const breakfastToday = members.reduce((acc, m) => {
-    const isEligible = isPlanEligible(m.meal_plan, "breakfast");
-    if (isEligible) {
-      const status = localStorage.getItem(`messmate.attendance_breakfast.${m.id}_${today}`);
-      if (status === "present") return acc + 1;
-    }
-    return acc;
-  }, 0);
-
+  const breakfastToday = todayAttendance.filter((a) => a.breakfast_status === "present").length;
   const lunchToday = todayAttendance.filter((a) => a.lunch_status === "present").length;
   const dinnerToday = todayAttendance.filter((a) => a.dinner_status === "present").length;
 
   const absentToday = members.reduce((acc, m) => {
-    const hasBreakfastAbsence =
-      isPlanEligible(m.meal_plan, "breakfast") &&
-      localStorage.getItem(`messmate.attendance_breakfast.${m.id}_${today}`) === "absent";
-
     const dbRecord = todayAttendance.find((a) => a.member_id === m.id);
+    const hasBreakfastAbsence =
+      isPlanEligible(m.meal_plan, "breakfast") && dbRecord?.breakfast_status === "absent";
     const hasLunchAbsence =
       isPlanEligible(m.meal_plan, "lunch") && dbRecord?.lunch_status === "absent";
     const hasDinnerAbsence =
@@ -506,17 +493,11 @@ function isPlanEligible(plan: string, meal: "breakfast" | "lunch" | "dinner") {
 
 function attendanceCountForDate(date: string, records: Attendance[], members: Member[]) {
   const dayRecords = records.filter((record) => record.date === date);
-  const breakfast = members.reduce((acc, member) => {
-    if (!isPlanEligible(member.meal_plan, "breakfast")) return acc;
-    return localStorage.getItem(`messmate.attendance_breakfast.${member.id}_${date}`) === "present"
-      ? acc + 1
-      : acc;
-  }, 0);
-
+  const breakfast = dayRecords.filter((record) => record.breakfast_status === "present").length;
   const lunch = dayRecords.filter((record) => record.lunch_status === "present").length;
   const dinner = dayRecords.filter((record) => record.dinner_status === "present").length;
   const total = breakfast + lunch + dinner;
-  return dayRecords.length > 0 || breakfast > 0 ? total : null;
+  return dayRecords.length > 0 ? total : null;
 }
 
 function formatActivityTime(value: string) {

@@ -24,6 +24,7 @@ export type Database = {
           member_id: string
           remarks: string | null
           updated_at: string
+          breakfast_status: Database["public"]["Enums"]["attendance_status"]
         }
         Insert: {
           created_at?: string
@@ -34,6 +35,7 @@ export type Database = {
           member_id: string
           remarks?: string | null
           updated_at?: string
+          breakfast_status?: Database["public"]["Enums"]["attendance_status"]
         }
         Update: {
           created_at?: string
@@ -44,6 +46,7 @@ export type Database = {
           member_id?: string
           remarks?: string | null
           updated_at?: string
+          breakfast_status?: Database["public"]["Enums"]["attendance_status"]
         }
         Relationships: [
           {
@@ -272,7 +275,7 @@ export type Database = {
         | "utensils"
         | "other"
       inventory_category: "food" | "utensil" | "asset"
-      meal_plan: "lunch" | "dinner" | "both"
+      meal_plan: "lunch" | "dinner" | "both" | "breakfast" | "breakfast_lunch" | "breakfast_dinner" | "all"
       movement_type: "stock_in" | "stock_out" | "damage" | "missing"
       payment_method: "cash" | "upi" | "bank_transfer" | "card"
     }
@@ -415,7 +418,7 @@ export const Constants = {
         "other",
       ],
       inventory_category: ["food", "utensil", "asset"],
-      meal_plan: ["lunch", "dinner", "both"],
+      meal_plan: ["lunch", "dinner", "both", "breakfast", "breakfast_lunch", "breakfast_dinner", "all"],
       movement_type: ["stock_in", "stock_out", "damage", "missing"],
       payment_method: ["cash", "upi", "bank_transfer", "card"],
     },

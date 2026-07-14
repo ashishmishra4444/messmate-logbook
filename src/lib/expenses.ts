@@ -1,4 +1,5 @@
 import type { Database } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Expense = Database["public"]["Tables"]["expenses"]["Row"];
 export type ExpenseInsert = Database["public"]["Tables"]["expenses"]["Insert"];
@@ -25,48 +26,40 @@ export const paymentMethods: { value: PaymentMethod; label: string }[] = [
   { value: "card", label: "Card" },
 ];
 
-const STORAGE_KEY = "messmate.expenses";
-
 export const expenseRepository = {
   async listBetween(startDate: string, endDate: string) {
-    return readExpenses()
-      .filter((expense) => expense.expense_date >= startDate && expense.expense_date <= endDate)
-      .sort(sortExpenses);
+    const { data, error } = await supabase
+      .from("expenses")
+      .select("*")
+      .gte("expense_date", startDate)
+      .lte("expense_date", endDate)
+      .order("expense_date", { ascending: false });
+    if (error) throw error;
+    return data || [];
   },
 
   async create(payload: ExpenseInsert) {
-    const now = new Date().toISOString();
-    const expense: Expense = {
-      id: payload.id ?? createId(),
-      expense_date: payload.expense_date ?? formatDate(new Date()),
-      category: payload.category,
-      title: payload.title,
-      description: payload.description ?? null,
-      amount: payload.amount,
-      payment_method: payload.payment_method,
-      added_by: payload.added_by ?? "Admin User",
-      created_at: payload.created_at ?? now,
-      updated_at: payload.updated_at ?? now,
-    };
-    writeExpenses([expense, ...readExpenses()].sort(sortExpenses));
+    const { error } = await supabase.from("expenses").insert({
+      ...payload,
+      id: payload.id || undefined,
+    });
+    if (error) throw error;
   },
 
   async update(id: string, payload: ExpenseUpdate) {
-    const expenses = readExpenses();
-    const index = expenses.findIndex((expense) => expense.id === id);
-    if (index === -1) throw new Error("Expense not found.");
-
-    expenses[index] = {
-      ...expenses[index],
-      ...payload,
-      id,
-      updated_at: new Date().toISOString(),
-    };
-    writeExpenses(expenses.sort(sortExpenses));
+    const { error } = await supabase
+      .from("expenses")
+      .update({
+        ...payload,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+    if (error) throw error;
   },
 
   async remove(id: string) {
-    writeExpenses(readExpenses().filter((expense) => expense.id !== id));
+    const { error } = await supabase.from("expenses").delete().eq("id", id);
+    if (error) throw error;
   },
 };
 
@@ -106,50 +99,3 @@ export function paymentMethodLabel(value: PaymentMethod | string) {
   return paymentMethods.find((method) => method.value === value)?.label ?? value;
 }
 
-function readExpenses(): Expense[] {
-  if (typeof window === "undefined") return [];
-
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(isExpense) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeExpenses(expenses: Expense[]) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-}
-
-function sortExpenses(a: Expense, b: Expense) {
-  const byDate = b.expense_date.localeCompare(a.expense_date);
-  if (byDate !== 0) return byDate;
-  return b.created_at.localeCompare(a.created_at);
-}
-
-function createId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `expense-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function isExpense(value: unknown): value is Expense {
-  if (!value || typeof value !== "object") return false;
-  const expense = value as Partial<Expense>;
-  return (
-    typeof expense.id === "string" &&
-    typeof expense.expense_date === "string" &&
-    typeof expense.title === "string" &&
-    typeof expense.amount === "number" &&
-    typeof expense.added_by === "string" &&
-    typeof expense.created_at === "string" &&
-    typeof expense.updated_at === "string" &&
-    expenseCategories.some((category) => category.value === expense.category) &&
-    paymentMethods.some((method) => method.value === expense.payment_method)
-  );
-}

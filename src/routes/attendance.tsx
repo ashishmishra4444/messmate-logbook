@@ -43,10 +43,7 @@ function AttendancePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("members").select("*").order("name");
       if (error) throw error;
-      return (data as Member[]).map((m) => {
-        const localPlan = localStorage.getItem(`messmate.member_meal_plan.${m.id}`);
-        return localPlan ? { ...m, meal_plan: localPlan as any } : m;
-      });
+      return data as Member[];
     },
   });
 
@@ -55,18 +52,12 @@ function AttendancePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("attendance").select("*").eq("date", iso);
       if (error) throw error;
-      return (data as Attendance[]).map((r) => {
-        const localBreakfastStatus = localStorage.getItem(`messmate.attendance_breakfast.${r.member_id}_${iso}`);
-        return {
-          ...r,
-          breakfast_status: (localBreakfastStatus || "not_marked") as Status
-        };
-      }) as (Attendance & { breakfast_status?: Status })[];
+      return data as Attendance[];
     },
   });
 
   const recordByMember = useMemo(() => {
-    const m = new Map<string, Attendance & { breakfast_status?: Status }>();
+    const m = new Map<string, Attendance>();
     records.forEach((r) => m.set(r.member_id, r));
     return m;
   }, [records]);
@@ -84,34 +75,14 @@ function AttendancePage() {
 
   const setMark = useMutation({
     mutationFn: async (vars: { memberId: string; field: "breakfast_status" | "lunch_status" | "dinner_status"; value: Status }) => {
-      if (vars.field === "breakfast_status") {
-        localStorage.setItem(`messmate.attendance_breakfast.${vars.memberId}_${iso}`, vars.value);
-        const { data: existing } = await supabase
-          .from("attendance")
-          .select("lunch_status, dinner_status")
-          .eq("member_id", vars.memberId)
-          .eq("date", iso)
-          .maybeSingle();
-
-        const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
-          member_id: vars.memberId,
-          date: iso,
-          updated_at: new Date().toISOString(),
-          lunch_status: existing?.lunch_status ?? ("not_marked" as Status),
-          dinner_status: existing?.dinner_status ?? ("not_marked" as Status),
-        };
-        const { error } = await supabase.from("attendance").upsert(payload, { onConflict: "member_id,date" });
-        if (error) throw error;
-      } else {
-        const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
-          member_id: vars.memberId,
-          date: iso,
-          updated_at: new Date().toISOString(),
-          ...(vars.field === "lunch_status" ? { lunch_status: vars.value } : { dinner_status: vars.value }),
-        };
-        const { error } = await supabase.from("attendance").upsert(payload, { onConflict: "member_id,date" });
-        if (error) throw error;
-      }
+      const payload: Database["public"]["Tables"]["attendance"]["Insert"] = {
+        member_id: vars.memberId,
+        date: iso,
+        updated_at: new Date().toISOString(),
+        [vars.field]: vars.value,
+      };
+      const { error } = await supabase.from("attendance").upsert(payload, { onConflict: "member_id,date" });
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["attendance"] }),
     onError: (e: Error) => toast.error(e.message),
@@ -124,15 +95,9 @@ function AttendancePage() {
         date: iso,
         lunch_status: (m.meal_plan === "dinner" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_dinner" ? "not_marked" : "present") as Status,
         dinner_status: (m.meal_plan === "lunch" || m.meal_plan === "breakfast" || m.meal_plan === "breakfast_lunch" ? "not_marked" : "present") as Status,
+        breakfast_status: (m.meal_plan.includes("breakfast") || m.meal_plan === "all" ? "present" : "not_marked") as Status,
         updated_at: new Date().toISOString(),
       }));
-
-      members.forEach((m) => {
-        const eligibleForBreakfast = m.meal_plan.includes("breakfast") || m.meal_plan === "all";
-        if (eligibleForBreakfast) {
-          localStorage.setItem(`messmate.attendance_breakfast.${m.id}_${iso}`, "present");
-        }
-      });
 
       const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "member_id,date" });
       if (error) throw error;
@@ -145,23 +110,13 @@ function AttendancePage() {
   });
 
   const counts = useMemo(() => {
-    const breakfast = members.reduce((acc, m) => {
-      const isEligible = m.meal_plan.includes("breakfast") || m.meal_plan === "all";
-      if (isEligible) {
-        const status = localStorage.getItem(`messmate.attendance_breakfast.${m.id}_${iso}`);
-        if (status === "present") return acc + 1;
-      }
-      return acc;
-    }, 0);
-
+    const breakfast = records.filter((r) => r.breakfast_status === "present").length;
     const lunch = records.filter((r) => r.lunch_status === "present").length;
     const dinner = records.filter((r) => r.dinner_status === "present").length;
 
     const absent = members.reduce((acc, m) => {
-      const hasBreakfastAbsence = (m.meal_plan.includes("breakfast") || m.meal_plan === "all") &&
-        localStorage.getItem(`messmate.attendance_breakfast.${m.id}_${iso}`) === "absent";
-      
       const rec = recordByMember.get(m.id);
+      const hasBreakfastAbsence = (m.meal_plan.includes("breakfast") || m.meal_plan === "all") && rec?.breakfast_status === "absent";
       const hasLunchAbsence = (m.meal_plan.includes("lunch") || m.meal_plan === "all") && rec?.lunch_status === "absent";
       const hasDinnerAbsence = (m.meal_plan.includes("dinner") || m.meal_plan === "all") && rec?.dinner_status === "absent";
 
@@ -172,7 +127,7 @@ function AttendancePage() {
     }, 0);
 
     return { breakfast, lunch, dinner, absent };
-  }, [records, members, iso, recordByMember]);
+  }, [records, members, recordByMember]);
 
   return (
     <div className="flex min-h-screen flex-col">
