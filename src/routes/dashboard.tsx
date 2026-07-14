@@ -103,24 +103,24 @@ function Dashboard() {
 
   const absentToday = members.reduce((acc, m) => {
     const dbRecord = todayAttendance.find((a) => a.member_id === m.id);
-    const hasBreakfastAbsence =
+    const isBreakfastAbsent =
       isPlanEligible(m.meal_plan, "breakfast") && dbRecord?.breakfast_status === "absent";
-    const hasLunchAbsence =
+    const isLunchAbsent =
       isPlanEligible(m.meal_plan, "lunch") && dbRecord?.lunch_status === "absent";
-    const hasDinnerAbsence =
+    const isDinnerAbsent =
       isPlanEligible(m.meal_plan, "dinner") && dbRecord?.dinner_status === "absent";
 
-    if (hasBreakfastAbsence || hasLunchAbsence || hasDinnerAbsence) {
-      return acc + 1;
-    }
-    return acc;
+    return acc +
+      (isBreakfastAbsent ? 1 : 0) +
+      (isLunchAbsent ? 1 : 0) +
+      (isDinnerAbsent ? 1 : 0);
   }, 0);
 
   const overviewData = [
     { name: "Breakfast", value: breakfastToday, fill: "#FBBF24" },
     { name: "Lunch", value: lunchToday, fill: "#F97316" },
     { name: "Dinner", value: dinnerToday, fill: "#3B82F6" },
-    { name: "Absent", value: absentToday, fill: "#EF4444" },
+    { name: "Missed", value: absentToday, fill: "#EF4444" },
   ];
   const overviewChartData = overviewData.map((item) => ({
     ...item,
@@ -207,7 +207,7 @@ function Dashboard() {
       color: "from-blue-500 to-sky-500",
     },
     {
-      label: "Absent Today",
+      label: "Missed Meals Today",
       value: absentToday,
       icon: TrendingUp,
       color: "from-rose-500 to-red-500",

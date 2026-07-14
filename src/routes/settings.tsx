@@ -1,5 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -77,24 +79,57 @@ const lastBackupDate = "27 June 2026";
 
 function SettingsPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const [dark, setDark] = useState(false);
   const [profile, setProfile] = useState<Profile>(defaultProfile);
   const [prefs, setPrefs] = useState<Prefs>(defaultPrefs);
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [now, setNow] = useState(() => new Date());
 
+  const { data: dbData } = useQuery({
+    queryKey: ["settings-profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      return { user, profile: data };
+    },
+  });
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const v = localStorage.getItem("theme") === "dark";
-    setDark(v);
-    document.documentElement.classList.toggle("dark", v);
-    try {
-      const p = localStorage.getItem("messmate.profile");
-      if (p) setProfile({ ...defaultProfile, ...JSON.parse(p) });
-      const pr = localStorage.getItem("messmate.prefs");
-      if (pr) setPrefs({ ...defaultPrefs, ...JSON.parse(pr) });
-    } catch (e) {
-      console.error(e);
+    if (dbData) {
+      if (dbData.profile) {
+        setProfile({
+          name: dbData.profile.name,
+          email: dbData.user.email || "",
+          phone: dbData.profile.phone || "",
+          messName: dbData.profile.mess_name || "",
+        });
+        setPrefs({
+          breakfastAlerts: dbData.profile.breakfast_alerts,
+          lunchAlerts: dbData.profile.lunch_alerts,
+          dinnerAlerts: dbData.profile.dinner_alerts,
+          lowStock: dbData.profile.low_stock_alerts,
+          weeklyReport: dbData.profile.weekly_report_alerts,
+          breakfastTime: dbData.profile.breakfast_time,
+          lunchTime: dbData.profile.lunch_time,
+          dinnerTime: dbData.profile.dinner_time,
+        });
+      } else {
+        setProfile(prev => ({ ...prev, email: dbData.user.email || "" }));
+      }
+    }
+  }, [dbData]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const v = localStorage.getItem("theme") === "dark";
+      setDark(v);
+      document.documentElement.classList.toggle("dark", v);
     }
   }, []);
 
@@ -109,26 +144,81 @@ function SettingsPage() {
     localStorage.setItem("theme", v ? "dark" : "light");
   };
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
     if (!profile.name.trim()) return toast.error("Name is required");
-    localStorage.setItem("messmate.profile", JSON.stringify(profile));
-    toast.success("Profile updated");
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not logged in");
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          name: profile.name.trim(),
+          phone: profile.phone,
+          mess_name: profile.messName.trim(),
+        });
+
+      if (error) throw error;
+      toast.success("Profile updated");
+      qc.invalidateQueries({ queryKey: ["settings-profile"] });
+      qc.invalidateQueries({ queryKey: ["sidebar-profile"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update profile");
+    }
   };
 
-  const savePrefs = (next: Prefs) => {
+  const savePrefs = async (next: Prefs) => {
     setPrefs(next);
-    localStorage.setItem("messmate.prefs", JSON.stringify(next));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not logged in");
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          breakfast_alerts: next.breakfastAlerts,
+          lunch_alerts: next.lunchAlerts,
+          dinner_alerts: next.dinnerAlerts,
+          low_stock_alerts: next.lowStock,
+          weekly_report_alerts: next.weeklyReport,
+          breakfast_time: next.breakfastTime,
+          lunch_time: next.lunchTime,
+          dinner_time: next.dinnerTime,
+        });
+
+      if (error) throw error;
+      toast.success("Preferences updated");
+      qc.invalidateQueries({ queryKey: ["settings-profile"] });
+      qc.invalidateQueries({ queryKey: ["sidebar-profile"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update preferences");
+    }
   };
 
-  const changePassword = () => {
-    if (!pw.current || !pw.next) return toast.error("Fill current and new password");
+  const changePassword = async () => {
+    if (!pw.next) return toast.error("Enter new password");
     if (pw.next.length < 6) return toast.error("Password must be at least 6 characters");
     if (pw.next !== pw.confirm) return toast.error("Passwords do not match");
-    toast.success("Password updated");
-    setPw({ current: "", next: "", confirm: "" });
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pw.next });
+      if (error) throw error;
+      toast.success("Password updated");
+      setPw({ current: "", next: "", confirm: "" });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update password");
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error(e);
+    }
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("messmate.profile");
     localStorage.removeItem("messmate.prefs");
@@ -189,7 +279,8 @@ function SettingsPage() {
                 <Input
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  disabled
+                  className="bg-muted text-muted-foreground cursor-not-allowed"
                 />
               </Field>
               <Field label="Phone">

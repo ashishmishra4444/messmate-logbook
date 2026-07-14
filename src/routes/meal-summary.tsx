@@ -51,33 +51,35 @@ function DashboardSummary() {
         <p className="text-sm text-muted-foreground">Member-wise meal count for this month</p>
       </header>
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 text-left">Member</th>
-              <th className="px-4 py-3 text-left">Room</th>
-              <th className="px-4 py-3 text-left">Plan</th>
-              <th className="px-4 py-3 text-right">Breakfast</th>
-              <th className="px-4 py-3 text-right">Lunch</th>
-              <th className="px-4 py-3 text-right">Dinner</th>
-              <th className="px-4 py-3 text-right">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from(map.values()).map((m, i) => (
-              <tr key={i} className="border-t border-border">
-                <td className="px-4 py-2.5 font-medium">{m.name}</td>
-                <td className="px-4 py-2.5 text-muted-foreground">{m.room}</td>
-                <td className="px-4 py-2.5 capitalize">{m.plan.replace("_", " + ")}</td>
-                <td className="px-4 py-2.5 text-right text-[oklch(var(--breakfast))] font-semibold">{m.breakfast}</td>
-                <td className="px-4 py-2.5 text-right text-[oklch(var(--lunch))] font-semibold">{m.lunch}</td>
-                <td className="px-4 py-2.5 text-right text-[oklch(var(--dinner))] font-semibold">{m.dinner}</td>
-                <td className="px-4 py-2.5 text-right font-bold">{m.breakfast + m.lunch + m.dinner}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px] text-sm">
+            <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 text-left">Member</th>
+                <th className="px-4 py-3 text-left">Room</th>
+                <th className="px-4 py-3 text-left">Plan</th>
+                <th className="px-4 py-3 text-right">Breakfast</th>
+                <th className="px-4 py-3 text-right">Lunch</th>
+                <th className="px-4 py-3 text-right">Dinner</th>
+                <th className="px-4 py-3 text-right">Total</th>
               </tr>
-            ))}
-            {map.size === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">No data this month yet.</td></tr>}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {Array.from(map.values()).map((m, i) => (
+                <tr key={i} className="border-t border-border">
+                  <td className="px-4 py-2.5 font-medium">{m.name}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{m.room}</td>
+                  <td className="px-4 py-2.5 capitalize">{m.plan.replace("_", " + ")}</td>
+                  <td className="px-4 py-2.5 text-right text-[oklch(var(--breakfast))] font-semibold">{m.breakfast}</td>
+                  <td className="px-4 py-2.5 text-right text-[oklch(var(--lunch))] font-semibold">{m.lunch}</td>
+                  <td className="px-4 py-2.5 text-right text-[oklch(var(--dinner))] font-semibold">{m.dinner}</td>
+                  <td className="px-4 py-2.5 text-right font-bold">{m.breakfast + m.lunch + m.dinner}</td>
+                </tr>
+              ))}
+              {map.size === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">No data this month yet.</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

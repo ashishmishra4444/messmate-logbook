@@ -9,12 +9,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import appCss from "../styles.css?url";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -74,18 +75,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: ({ location }) => {
-    if (location.pathname === "/login") return;
-
-    if (typeof window !== "undefined") {
-      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      if (!isLoggedIn) {
-        throw redirect({
-          to: "/login",
-        });
-      }
-    }
-  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -125,7 +114,34 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
+  const router = useRouter();
   const isLoginPage = location.pathname === "/login";
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      if (isLoginPage) {
+        setCheckingAuth(false);
+        return;
+      }
+
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (!user || error) {
+          localStorage.removeItem("isLoggedIn");
+          router.navigate({ to: "/login" });
+        } else {
+          setCheckingAuth(false);
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
+        localStorage.removeItem("isLoggedIn");
+        router.navigate({ to: "/login" });
+      }
+    }
+
+    checkAuth();
+  }, [location.pathname]);
 
   if (isLoginPage) {
     return (
@@ -134,6 +150,16 @@ function RootComponent() {
           <Outlet />
         </main>
         <Toaster richColors position="top-right" />
+      </QueryClientProvider>
+    );
+  }
+
+  if (checkingAuth) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <div className="flex h-screen w-screen items-center justify-center bg-background">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
       </QueryClientProvider>
     );
   }

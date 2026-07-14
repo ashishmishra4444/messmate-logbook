@@ -116,14 +116,14 @@ function AttendancePage() {
 
     const absent = members.reduce((acc, m) => {
       const rec = recordByMember.get(m.id);
-      const hasBreakfastAbsence = (m.meal_plan.includes("breakfast") || m.meal_plan === "all") && rec?.breakfast_status === "absent";
-      const hasLunchAbsence = (m.meal_plan.includes("lunch") || m.meal_plan === "all") && rec?.lunch_status === "absent";
-      const hasDinnerAbsence = (m.meal_plan.includes("dinner") || m.meal_plan === "all") && rec?.dinner_status === "absent";
+      const isBreakfastAbsent = (m.meal_plan.includes("breakfast") || m.meal_plan === "all") && rec?.breakfast_status === "absent";
+      const isLunchAbsent = (m.meal_plan.includes("lunch") || m.meal_plan === "all") && rec?.lunch_status === "absent";
+      const isDinnerAbsent = (m.meal_plan.includes("dinner") || m.meal_plan === "all") && rec?.dinner_status === "absent";
 
-      if (hasBreakfastAbsence || hasLunchAbsence || hasDinnerAbsence) {
-        return acc + 1;
-      }
-      return acc;
+      return acc + 
+        (isBreakfastAbsent ? 1 : 0) + 
+        (isLunchAbsent ? 1 : 0) + 
+        (isDinnerAbsent ? 1 : 0);
     }, 0);
 
     return { breakfast, lunch, dinner, absent };
@@ -163,7 +163,7 @@ function AttendancePage() {
           <Tile label="Breakfast present" value={counts.breakfast} tone="bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-300" />
           <Tile label="Lunch present" value={counts.lunch} tone="bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300" />
           <Tile label="Dinner present" value={counts.dinner} tone="bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300" />
-          <Tile label="Absences" value={counts.absent} tone="bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300" />
+          <Tile label="Missed Meals" value={counts.absent} tone="bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300" />
         </div>
       </header>
 
@@ -271,7 +271,7 @@ function AttendancePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-1 gap-2 min-[400px]:grid-cols-3">
                     <div className="rounded-lg border border-border p-2">
                       <div className="mb-1 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-[oklch(var(--breakfast))]">
                         <Utensils className="h-3 w-3" /> Breakfast

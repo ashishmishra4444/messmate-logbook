@@ -22,6 +22,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -58,11 +59,31 @@ const items = [
 ];
 
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export function AppSidebar() {
+  const { setOpenMobile } = useSidebar();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
   const isActive = (url: string) => pathname === url || (url === "/members" && pathname === "/");
+
+  const { data: profile } = useQuery({
+    queryKey: ["sidebar-profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data || { name: "Admin User", mess_name: "Mess Manager" };
+    },
+  });
+
+  const initials = profile?.name
+    ? profile.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "AU";
 
   const handleLogout = async () => {
     try {
@@ -106,7 +127,7 @@ export function AppSidebar() {
                     tooltip={item.title}
                     className="h-10 data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold"
                   >
-                    <Link to={item.url}>
+                    <Link to={item.url} onClick={() => setOpenMobile(false)}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -150,14 +171,16 @@ export function AppSidebar() {
             <button className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-sidebar-accent">
               <Avatar className="h-9 w-9 shrink-0">
                 <AvatarFallback className="bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white text-xs font-semibold">
-                  AU
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
                 <div className="truncate text-sm font-medium text-sidebar-foreground">
-                  Admin User
+                  {profile?.name || "Admin User"}
                 </div>
-                <div className="truncate text-[11px] text-sidebar-foreground/60">Mess Manager</div>
+                <div className="truncate text-[11px] text-sidebar-foreground/60">
+                  {profile?.mess_name || "Mess Manager"}
+                </div>
               </div>
             </button>
           </DropdownMenuTrigger>

@@ -25,6 +25,7 @@ export type Database = {
           remarks: string | null
           updated_at: string
           breakfast_status: Database["public"]["Enums"]["attendance_status"]
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -36,6 +37,7 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           breakfast_status?: Database["public"]["Enums"]["attendance_status"]
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -47,6 +49,7 @@ export type Database = {
           remarks?: string | null
           updated_at?: string
           breakfast_status?: Database["public"]["Enums"]["attendance_status"]
+          user_id?: string
         }
         Relationships: [
           {
@@ -70,6 +73,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           title: string
           updated_at: string
+          user_id: string
         }
         Insert: {
           added_by?: string
@@ -82,6 +86,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           title: string
           updated_at?: string
+          user_id?: string
         }
         Update: {
           added_by?: string
@@ -94,6 +99,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           title?: string
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -112,6 +118,7 @@ export type Database = {
           unit: string
           unit_price: number
           updated_at: string
+          user_id: string
         }
         Insert: {
           available_qty?: number
@@ -127,6 +134,7 @@ export type Database = {
           unit?: string
           unit_price?: number
           updated_at?: string
+          user_id?: string
         }
         Update: {
           available_qty?: number
@@ -142,6 +150,7 @@ export type Database = {
           unit?: string
           unit_price?: number
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -158,6 +167,7 @@ export type Database = {
           supplier: string | null
           total_cost: number | null
           used_by: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -171,6 +181,7 @@ export type Database = {
           supplier?: string | null
           total_cost?: number | null
           used_by?: string | null
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -184,6 +195,7 @@ export type Database = {
           supplier?: string | null
           total_cost?: number | null
           used_by?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -207,6 +219,7 @@ export type Database = {
           mobile: string
           name: string
           room_number: string
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -219,6 +232,7 @@ export type Database = {
           mobile: string
           name: string
           room_number: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -231,6 +245,7 @@ export type Database = {
           mobile?: string
           name?: string
           room_number?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -252,6 +267,57 @@ export type Database = {
           created_at?: string
           id?: string
           room_number?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          breakfast_alerts: boolean
+          breakfast_time: string
+          created_at: string
+          dinner_alerts: boolean
+          dinner_time: string
+          id: string
+          low_stock_alerts: boolean
+          lunch_alerts: boolean
+          lunch_time: string
+          mess_name: string
+          name: string
+          phone: string | null
+          updated_at: string
+          weekly_report_alerts: boolean
+        }
+        Insert: {
+          breakfast_alerts?: boolean
+          breakfast_time?: string
+          created_at?: string
+          dinner_alerts?: boolean
+          dinner_time?: string
+          id: string
+          low_stock_alerts?: boolean
+          lunch_alerts?: boolean
+          lunch_time?: string
+          mess_name?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          weekly_report_alerts?: boolean
+        }
+        Update: {
+          breakfast_alerts?: boolean
+          breakfast_time?: string
+          created_at?: string
+          dinner_alerts?: boolean
+          dinner_time?: string
+          id?: string
+          low_stock_alerts?: boolean
+          lunch_alerts?: boolean
+          lunch_time?: string
+          mess_name?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          weekly_report_alerts?: boolean
         }
         Relationships: []
       }

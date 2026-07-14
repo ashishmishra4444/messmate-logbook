@@ -299,7 +299,7 @@ function MembersPage() {
   return (
     <div className="flex h-[calc(100vh-0px)] min-h-screen flex-col">
       {/* Header */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border bg-card px-4 py-4 sm:px-6 lg:flex lg:flex-wrap">
+      <header className="flex flex-col gap-4 border-b border-border bg-card px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:flex-wrap">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-bold tracking-tight">Members</h1>
           <p className="text-sm text-muted-foreground">Manage members and their attendance</p>
@@ -465,7 +465,7 @@ function MembersPage() {
           {selected ? (
             <>
               {/* Header */}
-              <div className="grid grid-cols-1 gap-4 border-b border-border p-5 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="grid grid-cols-1 gap-4 border-b border-border p-5 xl:grid-cols-[minmax(240px,1fr)_auto]">
                 <div className="flex min-w-0 items-start gap-4">
                   <Avatar className="h-14 w-14 shrink-0">
                     <AvatarFallback className={cn("text-base font-bold", avatarColor(selected.id))}>
@@ -494,7 +494,7 @@ function MembersPage() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-5 w-full max-w-[580px]">
                   <StatCard
                     label="Breakfast Days"
                     value={stats.breakfastDays}
@@ -561,8 +561,8 @@ function MembersPage() {
               <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div className="notebook-rings absolute inset-y-0 left-0 w-6" />
                 <ScrollArea className="h-full">
-                  <div className="notebook-paper pl-8 pr-4 pb-6">
-                    <div className="sticky top-0 z-10 grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] border-b border-border bg-card/95 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                  <div className="notebook-paper min-w-[640px] pl-12 pr-4 pb-6">
+                    <div className="sticky top-0 z-10 grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] border-b border-[var(--color-notebook-line)] bg-[var(--color-notebook)]/95 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
                       <div>Date</div>
                       <div className="inline-flex items-center gap-1.5 text-[oklch(var(--breakfast))]">
                         <Utensils className="h-3.5 w-3.5" />
@@ -586,7 +586,7 @@ function MembersPage() {
                       return (
                         <div
                           key={row.iso}
-                          className="grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] items-center border-b border-[oklch(var(--notebook-line))] py-2 text-sm"
+                          className="grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] items-center border-b border-[var(--color-notebook-line)] py-2 text-sm"
                         >
                           <div className={cn("font-medium", isSun && "text-muted-foreground")}>
                             {row.date.toLocaleDateString("en-GB", {
@@ -656,8 +656,7 @@ function MembersPage() {
                 </ScrollArea>
               </div>
 
-              {/* Footer legend + actions */}
-              <div className="grid grid-cols-1 items-center gap-3 border-t border-border p-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="grid grid-cols-1 items-center gap-3 border-t border-border p-4 xl:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                   <Legend color="bg-success" label="Present" />
                   <Legend color="bg-destructive" label="Absent" />
@@ -735,9 +734,9 @@ function StatCard({
   bg: string;
 }) {
   return (
-    <div className={cn("rounded-xl border border-border px-3 py-2 text-center", bg)}>
-      <div className={cn("text-2xl font-bold leading-tight", accent)}>{value}</div>
-      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+    <div className={cn("rounded-xl border border-border px-2.5 py-3 text-center flex flex-col justify-center min-h-[68px] shadow-sm", bg)}>
+      <div className={cn("text-xl font-extrabold leading-none", accent)}>{value}</div>
+      <div className="mt-1.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/80 leading-tight">
         {label}
       </div>
     </div>
@@ -1075,7 +1074,7 @@ function MonthlySummaryDialog({
         <DialogHeader>
           <DialogTitle>{member.name} — Monthly Summary</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-3 gap-3 py-2 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-2 text-sm">
           <div className="rounded-lg border border-border p-3">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">
               Breakfast (this month)
@@ -1106,7 +1105,7 @@ function MonthlySummaryDialog({
             </div>
             <div className="text-xs text-destructive">{dinnerAbsent} absent</div>
           </div>
-          <div className="col-span-3 grid grid-cols-4 gap-3">
+          <div className="col-span-1 sm:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-lg bg-muted/60 p-3 text-center">
               <div className="text-xl font-bold">{stats.breakfastDays}</div>
               <div className="text-[11px] uppercase text-muted-foreground">Lifetime Breakfast</div>

@@ -280,7 +280,7 @@ export function ExpensePage() {
       </section>
 
       <section className="mt-5 rounded-2xl border border-border bg-card p-3 shadow-sm">
-        <div className="grid gap-3 lg:grid-cols-[minmax(170px,0.9fr)_minmax(180px,1fr)_minmax(190px,1fr)_minmax(220px,1.4fr)_auto_auto]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <MonthPicker selectedMonth={selectedMonth} onSelect={handleMonthSelect} />
           <Select
             value={categoryFilter}
@@ -289,7 +289,7 @@ export function ExpensePage() {
               setPage(1);
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full sm:w-44">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent className="z-[70]">
@@ -308,7 +308,7 @@ export function ExpensePage() {
               setPage(1);
             }}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="All Payment Methods" />
             </SelectTrigger>
             <SelectContent className="z-[70]">
@@ -320,7 +320,7 @@ export function ExpensePage() {
               ))}
             </SelectContent>
           </Select>
-          <div className="relative">
+          <div className="relative w-full sm:w-64">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -329,13 +329,13 @@ export function ExpensePage() {
                 setPage(1);
               }}
               placeholder="Search expenses..."
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
-          <Button className="gap-2" onClick={applyFilters}>
+          <Button className="w-full sm:w-auto gap-2" onClick={applyFilters}>
             <Filter className="h-4 w-4" /> Filter
           </Button>
-          <Button variant="outline" className="gap-2" onClick={resetFilters}>
+          <Button variant="outline" className="w-full sm:w-auto gap-2" onClick={resetFilters}>
             <RefreshCw className="h-4 w-4" /> Reset
           </Button>
         </div>
@@ -620,7 +620,7 @@ function MonthPicker({ selectedMonth, onSelect }: { selectedMonth: Date; onSelec
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2 lg:w-auto">
+        <Button variant="outline" className="w-full justify-start gap-2 sm:w-auto">
           <CalendarDays className="h-4 w-4" /> {monthLabel(selectedMonth)}
         </Button>
       </PopoverTrigger>
