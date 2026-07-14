@@ -170,7 +170,7 @@ function RootComponent() {
         <div className="flex min-h-screen w-full bg-background">
           <AppSidebar />
           <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex h-12 items-center border-b border-border bg-card/50 px-3 lg:hidden">
+            <div className="flex h-12 items-center border-b border-border bg-card/50 px-3 md:hidden">
               <SidebarTrigger />
             </div>
             <main className="flex-1 min-w-0">

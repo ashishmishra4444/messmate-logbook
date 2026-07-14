@@ -262,25 +262,25 @@ function SettingsPage() {
   const subscriptionPct = Math.round(((365 - daysLeft) / 365) * 100);
 
   return (
-    <div className="min-w-0 overflow-x-hidden p-4 sm:p-6">
+    <div className="page-enter min-w-0 overflow-x-hidden p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your profile, security and preferences</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Settings</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">Manage your profile, security and preferences</p>
       </header>
 
       <Tabs defaultValue="profile" className="min-w-0 w-full">
-        <TabsList className="flex h-auto min-h-9 w-full flex-wrap justify-start gap-1 bg-muted/60 p-1">
-          <TabsTrigger value="profile" className="gap-2"><User className="h-4 w-4" />Profile</TabsTrigger>
-          <TabsTrigger value="security" className="gap-2"><Lock className="h-4 w-4" />Security</TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2"><Bell className="h-4 w-4" />Notifications</TabsTrigger>
-          <TabsTrigger value="appearance" className="gap-2"><Sun className="h-4 w-4" />Appearance</TabsTrigger>
-          <TabsTrigger value="software-information" className="gap-2"><Info className="h-4 w-4" />Software Information</TabsTrigger>
+        <TabsList className="flex h-auto min-h-9 w-full flex-wrap justify-start gap-1 bg-muted rounded-xl p-1">
+          <TabsTrigger value="profile" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><User className="h-3.5 w-3.5" />Profile</TabsTrigger>
+          <TabsTrigger value="security" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Lock className="h-3.5 w-3.5" />Security</TabsTrigger>
+          <TabsTrigger value="notifications" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Bell className="h-3.5 w-3.5" />Notifications</TabsTrigger>
+          <TabsTrigger value="appearance" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Sun className="h-3.5 w-3.5" />Appearance</TabsTrigger>
+          <TabsTrigger value="software-information" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Info className="h-3.5 w-3.5" />Software Information</TabsTrigger>
         </TabsList>
 
         {/* PROFILE TAB */}
-        <TabsContent value="profile" className="mt-5">
-          <div className="grid min-w-0 max-w-2xl gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-            <h2 className="text-base font-semibold">Profile information</h2>
+        <TabsContent value="profile" className="mt-6">
+          <div className="grid min-w-0 max-w-2xl gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-[14px] font-semibold text-foreground">Profile information</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Full name" icon={User}>
                 <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} />
@@ -303,9 +303,9 @@ function SettingsPage() {
         </TabsContent>
 
         {/* SECURITY TAB */}
-        <TabsContent value="security" className="mt-5">
-          <div className="grid min-w-0 max-w-xl gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-            <h2 className="text-base font-semibold">Change password</h2>
+        <TabsContent value="security" className="mt-6">
+          <div className="grid min-w-0 max-w-xl gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-[14px] font-semibold text-foreground">Change password</h2>
             <Field label="Current password">
               <Input type="password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} />
             </Field>
@@ -320,36 +320,36 @@ function SettingsPage() {
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={changePassword} className="gap-2"><Lock className="h-4 w-4" /> Update password</Button>
             </div>
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/50 dark:bg-rose-950/30">
-              <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300">Sign out</h3>
-              <p className="mt-1 text-xs text-rose-600/80 dark:text-rose-300/70">End your current session on this device.</p>
+            <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+              <h3 className="text-sm font-semibold text-rose-500">Sign out</h3>
+              <p className="mt-1 text-xs text-rose-500/80">End your current session on this device.</p>
               <Button variant="destructive" className="mt-3 gap-2" onClick={logout}><LogOut className="h-4 w-4" /> Logout</Button>
             </div>
           </div>
         </TabsContent>
 
         {/* NOTIFICATIONS TAB */}
-        <TabsContent value="notifications" className="mt-5">
-          <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-            <h2 className="text-base font-semibold">Notification preferences</h2>
+        <TabsContent value="notifications" className="mt-6">
+          <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-[14px] font-semibold text-foreground">Notification preferences</h2>
             <div className="grid min-w-0 gap-3">
               <NotificationPrefCard title="Breakfast reminder" desc="Daily reminder before breakfast service."
-                icon={Coffee} iconClassName="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300"
+                icon={Coffee} iconClassName="bg-emerald-500/10 text-emerald-500"
                 checked={prefs.breakfastAlerts} onCheckedChange={(v) => savePrefs({ ...prefs, breakfastAlerts: v })}
                 reminderTime={prefs.breakfastTime} onReminderTimeChange={(time) => savePrefs({ ...prefs, breakfastTime: time })} />
               <NotificationPrefCard title="Lunch reminder" desc="Daily reminder before lunch service."
-                icon={Sun} iconClassName="bg-sky-100 text-sky-600 dark:bg-sky-950/50 dark:text-sky-300"
+                icon={Sun} iconClassName="bg-sky-500/10 text-sky-500"
                 checked={prefs.lunchAlerts} onCheckedChange={(v) => savePrefs({ ...prefs, lunchAlerts: v })}
                 reminderTime={prefs.lunchTime} onReminderTimeChange={(time) => savePrefs({ ...prefs, lunchTime: time })} />
               <NotificationPrefCard title="Dinner reminder" desc="Daily reminder before dinner service."
-                icon={Moon} iconClassName="bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300"
+                icon={Moon} iconClassName="bg-amber-500/10 text-amber-500"
                 checked={prefs.dinnerAlerts} onCheckedChange={(v) => savePrefs({ ...prefs, dinnerAlerts: v })}
                 reminderTime={prefs.dinnerTime} onReminderTimeChange={(time) => savePrefs({ ...prefs, dinnerTime: time })} />
               <NotificationPrefCard title="Low stock alerts" desc="Notify when an inventory item drops below minimum stock."
-                icon={Package} iconClassName="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300"
+                icon={Package} iconClassName="bg-rose-500/10 text-rose-500"
                 checked={prefs.lowStock} onCheckedChange={(v) => savePrefs({ ...prefs, lowStock: v })} />
               <NotificationPrefCard title="Weekly summary" desc="Receive a weekly attendance and meal summary."
-                icon={StickyNote} iconClassName="bg-violet-100 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300"
+                icon={StickyNote} iconClassName="bg-violet-500/10 text-violet-500"
                 checked={prefs.weeklyReport} onCheckedChange={(v) => savePrefs({ ...prefs, weeklyReport: v })} />
             </div>
             <div className="flex min-w-0 items-start gap-3 rounded-xl bg-primary/10 p-3 text-xs font-medium text-primary sm:p-4">
@@ -360,8 +360,9 @@ function SettingsPage() {
         </TabsContent>
 
         {/* APPEARANCE TAB */}
-        <TabsContent value="appearance" className="mt-5">
-          <div className="grid min-w-0 max-w-xl gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+        <TabsContent value="appearance" className="mt-6">
+          <div className="grid min-w-0 max-w-xl gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-[14px] font-semibold text-foreground">Theme</h2>
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 {dark ? <Moon className="h-5 w-5 shrink-0" /> : <Sun className="h-5 w-5 shrink-0" />}
@@ -376,35 +377,35 @@ function SettingsPage() {
         </TabsContent>
 
         {/* SOFTWARE INFORMATION TAB */}
-        <TabsContent value="software-information" className="mt-5">
+        <TabsContent value="software-information" className="mt-6">
           <div className="grid min-w-0 gap-5">
 
             {/* App identity banner */}
-            <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+            <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-card">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
               <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary shadow-inner ring-1 ring-primary/20">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-indigo-500/10 text-indigo-500 shadow-sm border border-indigo-500/20">
                     <Utensils className="h-7 w-7" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold tracking-tight">MessMate</h2>
-                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">v1.0.0</span>
+                      <h2 className="text-xl font-bold tracking-tight text-foreground">MessMate</h2>
+                      <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-500 border border-indigo-500/20">v1.0.0</span>
                     </div>
-                    <p className="mt-0.5 text-sm text-muted-foreground">Mess Management System · Build 1001</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-[13px] text-muted-foreground">Mess Management System · Build 1001</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground/70">
                       Developed by <span className="font-semibold text-foreground">WebNxt</span>{" · "}Released 27 June 2026
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <div className="flex items-center gap-1.5 rounded-lg border border-success/30 bg-success/10 px-3 py-1.5">
+                  <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5">
                     <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                     </span>
-                    <span className="text-xs font-semibold text-success dark:text-success">All systems operational</span>
+                    <span className="text-[12px] font-semibold text-emerald-500">All systems operational</span>
                   </div>
                 </div>
               </div>
@@ -413,33 +414,33 @@ function SettingsPage() {
             {/* Live usage stats */}
             <section className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <UsageStat icon={TrendingUp} label="Active Members" value={memberCount} suffix={`/ ${MAX_MEMBERS}`}
-                color="text-blue-500" bgColor="bg-blue-500/10" progress={memberUsagePct} progressColor="bg-blue-500" />
+                color="text-blue-500" bgColor="bg-blue-500/10 border-blue-500/20" progress={memberUsagePct} progressColor="bg-blue-500" />
               <UsageStat icon={Activity} label="Total Expenses"
                 value={`₹${(liveStats?.totalExpenses ?? 0).toLocaleString("en-IN")}`}
-                color="text-emerald-500" bgColor="bg-emerald-500/10" />
+                color="text-emerald-500" bgColor="bg-emerald-500/10 border-emerald-500/20" />
               <UsageStat icon={CheckCheck} label="Today's Attendance" value={liveStats?.todayAttendance ?? 0} suffix=" records"
-                color="text-violet-500" bgColor="bg-violet-500/10" />
+                color="text-violet-500" bgColor="bg-violet-500/10 border-violet-500/20" />
               <UsageStat icon={Package} label="Inventory Items" value={liveStats?.totalInventory ?? 0}
                 badge={liveStats?.lowStockCount ? `${liveStats.lowStockCount} low stock` : undefined}
-                badgeColor="text-amber-600 bg-amber-100 dark:bg-amber-950/50 dark:text-amber-400"
-                color="text-amber-500" bgColor="bg-amber-500/10" />
+                badgeColor="text-amber-500 bg-amber-500/10 border-amber-500/20"
+                color="text-amber-500" bgColor="bg-amber-500/10 border-amber-500/20" />
             </section>
 
             {/* Subscription card */}
-            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
               <div className="flex min-w-0 items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
-                  <h2 className="min-w-0 text-base font-semibold">Subscription</h2>
+                  <h2 className="min-w-0 text-[14px] font-semibold text-foreground">Subscription</h2>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1">
+                <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   </span>
-                  <span className="text-[11px] font-semibold text-success dark:text-success">Active</span>
+                  <span className="text-[11px] font-semibold text-emerald-500">Active</span>
                 </div>
               </div>
 
@@ -448,15 +449,15 @@ function SettingsPage() {
                 {(["Basic", "Pro", "Enterprise"] as const).map((plan) => {
                   const active = plan === currentPlan;
                   return (
-                    <div key={plan} className={`relative rounded-xl border p-4 transition-all ${active ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20" : "border-border bg-card/50 opacity-50"}`}>
+                    <div key={plan} className={`relative rounded-xl border p-4 transition-all ${active ? "border-indigo-500/20 bg-indigo-500/10 shadow-sm" : "border-border bg-secondary/30 opacity-60"}`}>
                       {active && (
-                        <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">Current</span>
+                        <span className="absolute right-3 top-3 rounded-full bg-indigo-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Current</span>
                       )}
                       <div className="flex items-center gap-2">
-                        {plan === "Basic" && <Zap className="h-4 w-4 text-muted-foreground" />}
-                        {plan === "Pro" && <Star className="h-4 w-4 text-primary" />}
-                        {plan === "Enterprise" && <Globe className="h-4 w-4 text-muted-foreground" />}
-                        <span className={`text-sm font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{plan}</span>
+                        {plan === "Basic" && <Zap className="h-4 w-4 text-muted-foreground/50" />}
+                        {plan === "Pro" && <Star className="h-4 w-4 text-indigo-500" />}
+                        {plan === "Enterprise" && <Globe className="h-4 w-4 text-muted-foreground/50" />}
+                        <span className={`text-[13px] font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{plan}</span>
                       </div>
                       <p className="mt-1 text-[11px] text-muted-foreground">
                         {plan === "Basic" && "Up to 100 members"}
@@ -469,15 +470,15 @@ function SettingsPage() {
               </div>
 
               {/* Subscription timeline bar */}
-              <div className="rounded-xl border border-border bg-muted/30 p-4">
-                <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
+              <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                <div className="mb-3 flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
                   <span>Subscription period</span>
-                  <span className="font-semibold text-foreground">{daysLeft} days remaining</span>
+                  <span className="text-indigo-500">{daysLeft} days remaining</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-border">
-                  <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${subscriptionPct}%` }} />
+                  <div className="h-full rounded-full bg-indigo-500 transition-all duration-700" style={{ width: `${subscriptionPct}%` }} />
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="mt-2 flex items-center justify-between text-[11px] font-medium text-muted-foreground/60">
                   <span>{subscriptionStartDate}</span>
                   <span>{subscriptionExpiryDate}</span>
                 </div>
@@ -493,79 +494,79 @@ function SettingsPage() {
             </section>
 
             {/* System information */}
-            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary text-muted-foreground">
                   <Server className="h-5 w-5" />
                 </div>
-                <h2 className="min-w-0 text-base font-semibold">System Information</h2>
+                <h2 className="min-w-0 text-[14px] font-semibold text-foreground">System Information</h2>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <Database className="h-3.5 w-3.5" />Database Status
                   </div>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className={`inline-flex h-2 w-2 rounded-full ${dbConnected === null ? "bg-muted animate-pulse" : dbConnected ? "bg-success" : "bg-destructive"}`} />
-                    <span className="text-sm font-semibold">
+                    <span className={`inline-flex h-2 w-2 rounded-full ${dbConnected === null ? "bg-muted-foreground/30 animate-pulse" : dbConnected ? "bg-emerald-500" : "bg-red-500"}`} />
+                    <span className="text-[13px] font-semibold text-foreground">
                       {dbConnected === null ? "Checking…" : dbConnected ? "Connected" : "Disconnected"}
                     </span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <HardDrive className="h-3.5 w-3.5" />Database
                   </div>
-                  <div className="mt-2 text-sm font-semibold">Supabase PostgreSQL</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">v15 · Realtime enabled</div>
+                  <div className="mt-2 text-[13px] font-semibold text-foreground">Supabase PostgreSQL</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground/70">v15 · Realtime enabled</div>
                 </div>
 
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <User className="h-3.5 w-3.5" />Logged-in User
                   </div>
-                  <div className="mt-2 text-sm font-semibold">{profile.name || "Admin User"}</div>
-                  <div className="mt-0.5 max-w-full truncate text-[11px] text-muted-foreground">{profile.email}</div>
+                  <div className="mt-2 text-[13px] font-semibold text-foreground">{profile.name || "Admin User"}</div>
+                  <div className="mt-0.5 max-w-full truncate text-[11px] text-muted-foreground/70">{profile.email}</div>
                 </div>
 
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <Cpu className="h-3.5 w-3.5" />Runtime
                   </div>
-                  <div className="mt-2 text-sm font-semibold">React 19 · Vite</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">TanStack Router + Query</div>
+                  <div className="mt-2 text-[13px] font-semibold text-foreground">React 19 · Vite</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground/70">TanStack Router + Query</div>
                 </div>
 
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <Wifi className="h-3.5 w-3.5" />Last Backup
                   </div>
-                  <div className="mt-2 text-sm font-semibold">{lastBackupDate}</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">Manual export via Backup &amp; Export</div>
+                  <div className="mt-2 text-[13px] font-semibold text-foreground">{lastBackupDate}</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground/70">Manual export via Backup &amp; Export</div>
                 </div>
 
-                <div className="rounded-xl border border-border p-4">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />Local Time
                   </div>
-                  <div className="mt-2 text-sm font-semibold">{formatDateTime(now)}</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">India Standard Time (UTC+5:30)</div>
+                  <div className="mt-2 text-[13px] font-semibold text-foreground">{formatDateTime(now)}</div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground/70">India Standard Time (UTC+5:30)</div>
                 </div>
               </div>
             </section>
 
             {/* About + Changelog */}
-            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:grid-cols-[1fr_300px]">
+            <section className="grid min-w-0 gap-5 rounded-2xl border border-border bg-card p-6 shadow-card lg:grid-cols-[1fr_300px]">
               <div>
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
-                  <h2 className="min-w-0 text-base font-semibold">About MessMate</h2>
+                  <h2 className="min-w-0 text-[14px] font-semibold text-foreground">About MessMate</h2>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
                   MessMate is a purpose-built SaaS application for hostel and mess operators. It consolidates
                   daily attendance tracking, meal plan management, expense accounting, inventory control,
                   and business reporting into a single streamlined dashboard — replacing manual registers
@@ -588,7 +589,7 @@ function SettingsPage() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-muted/30 p-4">
+              <div className="rounded-xl border border-border bg-secondary/30 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Changelog</span>
                   <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -644,28 +645,28 @@ function UsageStat({
   badgeColor?: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
-        <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${bgColor}`}>
-          <Icon className={`h-4 w-4 ${color}`} />
+        <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${bgColor}`}>
+          <Icon className={`h-5 w-5 ${color}`} />
         </div>
         {badge && (
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${badgeColor}`}>{badge}</span>
+          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${badgeColor}`}>{badge}</span>
         )}
       </div>
       <div>
-        <div className="text-xs font-medium text-muted-foreground">{label}</div>
+        <div className="text-[12px] font-medium text-muted-foreground">{label}</div>
         <div className="mt-1 flex items-baseline gap-1">
-          <span className="text-2xl font-bold tracking-tight">{value}</span>
-          {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
+          <span className="text-2xl font-bold tracking-tight text-foreground">{value}</span>
+          {suffix && <span className="text-[12px] text-muted-foreground">{suffix}</span>}
         </div>
       </div>
       {progress !== undefined && progressColor && (
         <div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary mt-2">
             <div className={`h-full rounded-full transition-all duration-700 ${progressColor}`} style={{ width: `${progress}%` }} />
           </div>
-          <div className="mt-1 text-[11px] text-muted-foreground">{progress}% of limit used</div>
+          <div className="mt-1.5 text-[11px] text-muted-foreground">{progress}% of limit used</div>
         </div>
       )}
     </div>
@@ -684,11 +685,11 @@ function InfoTile({
   mono?: boolean;
 }) {
   return (
-    <div className="flex min-w-0 gap-3 rounded-xl border border-border p-4">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+    <div className="flex min-w-0 gap-3 rounded-xl border p-4 bg-secondary/50">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
       <div className="min-w-0">
-        <div className="text-xs font-medium text-muted-foreground">{label}</div>
-        <div className={`mt-1 break-all text-sm font-semibold ${mono ? "font-mono tracking-tight" : ""}`}>{value}</div>
+        <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
+        <div className={`mt-1 break-all text-[13px] font-semibold text-foreground ${mono ? "font-mono tracking-tight" : ""}`}>{value}</div>
       </div>
     </div>
   );
@@ -721,8 +722,8 @@ function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-        {Icon && <Icon className="h-3.5 w-3.5" />}
+      <Label className="flex items-center gap-1.5 text-[12px] font-medium text-foreground">
+        {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground" />}
         {label}
       </Label>
       {children}
@@ -749,14 +750,14 @@ function NotificationPrefCard({
   onReminderTimeChange?: (time: string) => void;
 }) {
   return (
-    <div className="grid min-w-0 gap-4 rounded-xl border border-border bg-card/70 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+    <div className="grid min-w-0 gap-4 rounded-xl border border-border bg-card shadow-sm p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
       <div className="flex min-w-0 items-start gap-4">
         <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${iconClassName}`}>
-          <Icon className="h-6 w-6" />
+          <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 pt-0.5">
-          <div className="break-words text-sm font-semibold">{title}</div>
-          <div className="mt-1 break-words text-xs text-muted-foreground">{desc}</div>
+          <div className="break-words text-[14px] font-semibold text-foreground">{title}</div>
+          <div className="mt-1 break-words text-[13px] text-muted-foreground">{desc}</div>
         </div>
       </div>
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 sm:justify-end sm:gap-8">
@@ -764,7 +765,7 @@ function NotificationPrefCard({
           <div className="grid min-w-36 gap-1.5">
             <Label className="text-[11px] font-medium text-muted-foreground">Reminder time</Label>
             <Select value={reminderTime} onValueChange={onReminderTimeChange}>
-              <SelectTrigger className="h-10 w-36 rounded-lg bg-background text-xs font-medium">
+              <SelectTrigger className="h-10 w-36 rounded-lg bg-background text-[13px] font-medium border-input text-foreground">
                 <div className="flex min-w-0 items-center gap-2">
                   <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <SelectValue placeholder="Select time" />

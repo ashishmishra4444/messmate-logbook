@@ -63,26 +63,32 @@ function BackupPage() {
     downloadCSV(`messmate-attendance-${new Date().toISOString().slice(0, 10)}.csv`, rows);
   };
   return (
-    <div className="p-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Backup &amp; Export</h1>
-        <p className="text-sm text-muted-foreground">Download a copy of your data anytime.</p>
+    <div className="page-enter min-h-screen p-6">
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Backup &amp; Export</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">Download a copy of your mess data anytime.</p>
       </header>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <Database className="h-6 w-6 text-primary" />
-          <h2 className="mt-3 font-semibold">Members CSV</h2>
-          <p className="text-sm text-muted-foreground">Export the full members list.</p>
-          <Button className="mt-4 gap-2" onClick={exportMembers}>
-            <FileDown className="h-4 w-4" /> Download
+
+      <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
+        <div className="group rounded-2xl border border-border bg-card p-6 shadow-card card-hover">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+            <Database className="h-5 w-5 text-indigo-600 dark:text-indigo-500" />
+          </div>
+          <h2 className="mt-4 text-[14px] font-semibold text-foreground">Members List</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">Export the full members list as an Excel file.</p>
+          <Button className="mt-5 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-indigo-500 dark:hover:bg-indigo-600 text-[13px] h-9" onClick={exportMembers}>
+            <FileDown className="h-4 w-4" /> Download Excel
           </Button>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-          <Database className="h-6 w-6 text-primary" />
-          <h2 className="mt-3 font-semibold">Attendance CSV</h2>
-          <p className="text-sm text-muted-foreground">Export all attendance records.</p>
-          <Button className="mt-4 gap-2" onClick={exportAttendance}>
-            <FileDown className="h-4 w-4" /> Download
+
+        <div className="group rounded-2xl border border-border bg-card p-6 shadow-card card-hover">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <Database className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+          </div>
+          <h2 className="mt-4 text-[14px] font-semibold text-foreground">Attendance Records</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">Export all attendance records as a CSV file.</p>
+          <Button className="mt-5 gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-500 dark:hover:bg-emerald-600 text-[13px] h-9" onClick={exportAttendance}>
+            <FileDown className="h-4 w-4" /> Download CSV
           </Button>
         </div>
       </div>

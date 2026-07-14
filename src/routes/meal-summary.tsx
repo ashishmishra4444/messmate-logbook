@@ -45,38 +45,47 @@ function DashboardSummary() {
   });
 
   return (
-    <div className="p-6">
+    <div className="page-enter min-h-screen p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold">Meal Summary</h1>
-        <p className="text-sm text-muted-foreground">Member-wise meal count for this month</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Meal Summary</h1>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
+          Member-wise meal count for {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        </p>
       </header>
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-sm">
-            <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left">Member</th>
-                <th className="px-4 py-3 text-left">Room</th>
-                <th className="px-4 py-3 text-left">Plan</th>
-                <th className="px-4 py-3 text-right">Breakfast</th>
-                <th className="px-4 py-3 text-right">Lunch</th>
-                <th className="px-4 py-3 text-right">Dinner</th>
-                <th className="px-4 py-3 text-right">Total</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Member</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Room</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Plan</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-amber-500">Breakfast</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-indigo-500">Lunch</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-violet-500">Dinner</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Total</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/50">
               {Array.from(map.values()).map((m, i) => (
-                <tr key={i} className="border-t border-border">
-                  <td className="px-4 py-2.5 font-medium">{m.name}</td>
-                  <td className="px-4 py-2.5 text-muted-foreground">{m.room}</td>
-                  <td className="px-4 py-2.5 capitalize">{m.plan.replace("_", " + ")}</td>
-                  <td className="px-4 py-2.5 text-right text-[oklch(var(--breakfast))] font-semibold">{m.breakfast}</td>
-                  <td className="px-4 py-2.5 text-right text-[oklch(var(--lunch))] font-semibold">{m.lunch}</td>
-                  <td className="px-4 py-2.5 text-right text-[oklch(var(--dinner))] font-semibold">{m.dinner}</td>
-                  <td className="px-4 py-2.5 text-right font-bold">{m.breakfast + m.lunch + m.dinner}</td>
+                <tr key={i} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-4 py-3 text-[13px] font-semibold text-foreground">{m.name}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">Room {m.room}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary capitalize">
+                      {m.plan.replace(/_/g, " + ")}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right text-[13px] font-bold text-amber-500">{m.breakfast}</td>
+                  <td className="px-4 py-3 text-right text-[13px] font-bold text-indigo-500">{m.lunch}</td>
+                  <td className="px-4 py-3 text-right text-[13px] font-bold text-violet-500">{m.dinner}</td>
+                  <td className="px-4 py-3 text-right text-[13px] font-extrabold text-foreground">{m.breakfast + m.lunch + m.dinner}</td>
                 </tr>
               ))}
-              {map.size === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">No data this month yet.</td></tr>}
+              {map.size === 0 && (
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-[13px] text-muted-foreground">No attendance data for this month yet.</td></tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -259,15 +259,15 @@ export function ExpensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="page-enter min-h-screen p-6 space-y-5">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Expense Management</h1>
-          <p className="text-sm text-muted-foreground">Track mess spending and monthly expense reports</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Expense Management</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Track mess spending and monthly expense reports</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MonthPicker selectedMonth={selectedMonth} onSelect={handleMonthSelect} />
-          <Button className="gap-2" onClick={openCreateDrawer}>
+          <Button className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-semibold h-9 shadow-sm" onClick={openCreateDrawer}>
             <Plus className="h-4 w-4" /> Add Expense
           </Button>
         </div>
@@ -279,113 +279,80 @@ export function ExpensePage() {
         ))}
       </section>
 
-      <section className="mt-5 rounded-2xl border border-border bg-card p-3 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+        <div className="flex flex-wrap items-center gap-2.5">
           <MonthPicker selectedMonth={selectedMonth} onSelect={handleMonthSelect} />
-          <Select
-            value={categoryFilter}
-            onValueChange={(value) => {
-              setCategoryFilter(value as CategoryFilter);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-44">
+          <Select value={categoryFilter} onValueChange={(value) => { setCategoryFilter(value as CategoryFilter); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-44 rounded-xl border-input bg-background hover:bg-accent hover:text-accent-foreground text-foreground text-[13px] h-9">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
-            <SelectContent className="z-[70]">
+            <SelectContent className="z-[70] rounded-xl">
               <SelectItem value="all">All Categories</SelectItem>
               {expenseCategories.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
-                  {category.label}
-                </SelectItem>
+                <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select
-            value={paymentFilter}
-            onValueChange={(value) => {
-              setPaymentFilter(value as PaymentFilter);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-48">
+          <Select value={paymentFilter} onValueChange={(value) => { setPaymentFilter(value as PaymentFilter); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-48 rounded-xl border-input bg-background hover:bg-accent hover:text-accent-foreground text-foreground text-[13px] h-9">
               <SelectValue placeholder="All Payment Methods" />
             </SelectTrigger>
-            <SelectContent className="z-[70]">
+            <SelectContent className="z-[70] rounded-xl">
               <SelectItem value="all">All Payment Methods</SelectItem>
               {paymentMethods.map((method) => (
-                <SelectItem key={method.value} value={method.value}>
-                  {method.label}
-                </SelectItem>
+                <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <div className="relative w-full sm:w-64">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-              }}
-              placeholder="Search expenses..."
-              className="pl-9 w-full"
-            />
+            <Input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+              placeholder="Search expenses..." className="pl-9 w-full rounded-xl border-input bg-background text-foreground text-[13px] h-9 focus-visible:ring-indigo-500/20" />
           </div>
-          <Button className="w-full sm:w-auto gap-2" onClick={applyFilters}>
-            <Filter className="h-4 w-4" /> Filter
+          <Button className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] h-9 gap-1.5" onClick={applyFilters}>
+            <Filter className="h-3.5 w-3.5" /> Filter
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto gap-2" onClick={resetFilters}>
-            <RefreshCw className="h-4 w-4" /> Reset
+          <Button variant="outline" className="rounded-xl border-input bg-background hover:bg-accent text-foreground text-[13px] h-9 gap-1.5" onClick={resetFilters}>
+            <RefreshCw className="h-3.5 w-3.5" /> Reset
           </Button>
         </div>
       </section>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-sm">
-            <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left">Date</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Title</th>
-                <th className="px-4 py-3 text-right">Amount</th>
-                <th className="px-4 py-3 text-left">Payment Method</th>
-                <th className="px-4 py-3 text-left">Added By</th>
-                <th className="px-4 py-3 text-center">Actions</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Date</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Category</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Title</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Amount</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Payment</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Added By</th>
+                <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/50">
               {pagedExpenses.map((expense) => (
-                <tr key={expense.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-muted-foreground">{formatDisplayDate(expense.expense_date)}</td>
+                <tr key={expense.id} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{formatDisplayDate(expense.expense_date)}</td>
+                  <td className="px-4 py-3"><CategoryBadge category={expense.category} /></td>
                   <td className="px-4 py-3">
-                    <CategoryBadge category={expense.category} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{expense.title}</div>
+                    <div className="text-[13px] font-medium text-foreground">{expense.title}</div>
                     {expense.description && (
-                      <div className="max-w-64 truncate text-xs text-muted-foreground">{expense.description}</div>
+                      <div className="max-w-64 truncate text-[11px] text-muted-foreground">{expense.description}</div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold">{formatMoney(expense.amount)}</td>
+                  <td className="px-4 py-3 text-right text-[13px] font-bold text-foreground">{formatMoney(expense.amount)}</td>
+                  <td className="px-4 py-3"><PaymentBadge method={expense.payment_method} /></td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{expense.added_by}</td>
                   <td className="px-4 py-3">
-                    <PaymentBadge method={expense.payment_method} />
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{expense.added_by}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => openEditDrawer(expense)}>
+                    <div className="flex justify-center gap-1.5">
+                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 rounded-lg border-input bg-background hover:bg-accent text-foreground" onClick={() => openEditDrawer(expense)}>
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        onClick={() => {
-                          if (window.confirm("Delete this expense?")) deleteMutation.mutate(expense.id);
-                        }}
-                      >
+                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 rounded-lg border-rose-500/20 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
+                        onClick={() => { if (window.confirm("Delete this expense?")) deleteMutation.mutate(expense.id); }}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -393,54 +360,37 @@ export function ExpensePage() {
                 </tr>
               ))}
               {pagedExpenses.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
-                    No expenses found for the selected filters.
-                  </td>
-                </tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-[13px] text-muted-foreground">No expenses found for the selected filters.</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-[12px] text-muted-foreground">
           <span>
             Showing {filteredExpenses.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{" "}
             {Math.min(currentPage * pageSize, filteredExpenses.length)} of {filteredExpenses.length} entries
           </span>
           <div className="flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setPage((value) => Math.max(1, value - 1))}
-            >
+            <Button size="sm" variant="outline" className="rounded-lg border-input bg-background hover:bg-accent text-foreground h-8" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             {Array.from({ length: totalPages }, (_, index) => index + 1).slice(0, 5).map((number) => (
-              <Button
-                key={number}
-                size="sm"
-                variant={number === currentPage ? "default" : "outline"}
-                onClick={() => setPage(number)}
-              >
-                {number}
-              </Button>
+              <Button key={number} size="sm" className={`rounded-lg h-8 ${number === currentPage ? "bg-indigo-600 hover:bg-indigo-700 text-white border-transparent" : "bg-background hover:bg-accent text-foreground border-input"}`}
+                variant={number === currentPage ? "default" : "outline"} onClick={() => setPage(number)}>{number}</Button>
             ))}
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-            >
+            <Button size="sm" variant="outline" className="rounded-lg border-input bg-background hover:bg-accent text-foreground h-8" disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </section>
 
-      <section className="mt-5 grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="font-semibold">Monthly Summary ({monthLabel(selectedMonth)})</h2>
+      <section className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-[14px] font-semibold text-foreground">Monthly Summary</h2>
+            <span className="text-[12px] text-muted-foreground font-medium">({monthLabel(selectedMonth)})</span>
+          </div>
           <div className="mt-4 grid gap-4 md:grid-cols-[220px_1fr_220px]">
             <div className="h-52">
               {pieData.length > 0 ? (
@@ -471,22 +421,22 @@ export function ExpensePage() {
                 </div>
               ))}
             </div>
-            <div className="rounded-xl bg-primary/10 p-4 text-primary">
-              <Wallet className="mb-5 h-10 w-10 opacity-60" />
-              <div className="text-xs font-semibold uppercase tracking-wide">Total Monthly Expense</div>
-              <div className="mt-2 text-3xl font-bold">{formatMoney(summary.total)}</div>
+            <div className="rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-4 text-indigo-500">
+              <Wallet className="mb-4 h-9 w-9 text-indigo-500" />
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-indigo-400">Total Monthly Expense</div>
+              <div className="mt-2 text-3xl font-bold text-indigo-500">{formatMoney(summary.total)}</div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="font-semibold">Export Reports</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Export filtered expenses in your preferred format.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button variant="outline" className="gap-2 text-emerald-700" onClick={exportExcel}>
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+          <h2 className="text-[14px] font-semibold text-foreground mb-1">Export Reports</h2>
+          <p className="text-[13px] text-muted-foreground">Export filtered expenses in your preferred format.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button variant="outline" className="rounded-xl border-emerald-500/20 bg-emerald-500/10 gap-2 text-emerald-500 hover:bg-emerald-500/20 text-[13px] h-9" onClick={exportExcel}>
               <FileSpreadsheet className="h-4 w-4" /> Export Excel
             </Button>
-            <Button variant="outline" className="gap-2 text-red-600" onClick={exportPDF}>
+            <Button variant="outline" className="rounded-xl border-rose-500/20 bg-rose-500/10 gap-2 text-rose-500 hover:bg-rose-500/20 text-[13px] h-9" onClick={exportPDF}>
               <FileText className="h-4 w-4" /> Export PDF
             </Button>
           </div>
@@ -494,98 +444,54 @@ export function ExpensePage() {
       </section>
 
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>{editingExpense ? "Edit Expense" : "Add Expense"}</SheetTitle>
-            <SheetDescription>Enter expense details and save them to the monthly register.</SheetDescription>
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md bg-card">
+          <SheetHeader className="pb-4 border-b border-border">
+            <SheetTitle className="text-base font-bold text-foreground">{editingExpense ? "Edit Expense" : "Add Expense"}</SheetTitle>
+            <SheetDescription className="text-[13px] text-muted-foreground">Enter expense details and save them to the monthly register.</SheetDescription>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <Label>Expense Date *</Label>
-              <Input
-                type="date"
-                value={form.expense_date}
-                onChange={(event) => setForm({ ...form, expense_date: event.target.value })}
-              />
+          <div className="mt-5 space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Expense Date <span className="text-red-500">*</span></Label>
+              <Input type="date" value={form.expense_date} onChange={(event) => setForm({ ...form, expense_date: event.target.value })} className="rounded-xl border-input bg-background text-foreground text-[13px]" />
             </div>
-            <div className="space-y-2">
-              <Label>Category *</Label>
-              <Select
-                value={form.category}
-                onValueChange={(value) => setForm({ ...form, category: value as ExpenseCategory })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent className="z-[80]">
-                  {expenseCategories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Category <span className="text-red-500">*</span></Label>
+              <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value as ExpenseCategory })}>
+                <SelectTrigger className="rounded-xl border-input bg-background text-foreground text-[13px]"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                <SelectContent className="z-[80] rounded-xl bg-card border-border">
+                  {expenseCategories.map((category) => <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Expense Title *</Label>
-              <Input
-                value={form.title}
-                onChange={(event) => setForm({ ...form, title: event.target.value })}
-                placeholder="Enter expense title"
-              />
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Expense Title <span className="text-red-500">*</span></Label>
+              <Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Enter expense title" className="rounded-xl border-input bg-background text-foreground text-[13px]" />
             </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={form.description}
-                onChange={(event) => setForm({ ...form, description: event.target.value })}
-                placeholder="Enter description (optional)"
-                className="min-h-24"
-              />
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Description</Label>
+              <Textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Optional description" className="min-h-24 rounded-xl border-input bg-background text-foreground text-[13px]" />
             </div>
-            <div className="space-y-2">
-              <Label>Amount *</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.amount}
-                onChange={(event) => setForm({ ...form, amount: event.target.value })}
-                placeholder="Enter amount"
-              />
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Amount (₹) <span className="text-red-500">*</span></Label>
+              <Input type="number" min="0" step="0.01" value={form.amount} onChange={(event) => setForm({ ...form, amount: event.target.value })} placeholder="0.00" className="rounded-xl border-input bg-background text-foreground text-[13px]" />
             </div>
-            <div className="space-y-2">
-              <Label>Payment Method *</Label>
-              <Select
-                value={form.payment_method}
-                onValueChange={(value) => setForm({ ...form, payment_method: value as PaymentMethod })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Payment Method" />
-                </SelectTrigger>
-                <SelectContent className="z-[80]">
-                  {paymentMethods.map((method) => (
-                    <SelectItem key={method.value} value={method.value}>
-                      {method.label}
-                    </SelectItem>
-                  ))}
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Payment Method <span className="text-red-500">*</span></Label>
+              <Select value={form.payment_method} onValueChange={(value) => setForm({ ...form, payment_method: value as PaymentMethod })}>
+                <SelectTrigger className="rounded-xl border-input bg-background text-foreground text-[13px]"><SelectValue placeholder="Select Payment Method" /></SelectTrigger>
+                <SelectContent className="z-[80] rounded-xl bg-card border-border">
+                  {paymentMethods.map((method) => <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Added By *</Label>
-              <Input
-                value={form.added_by}
-                onChange={(event) => setForm({ ...form, added_by: event.target.value })}
-                placeholder="Admin User"
-              />
+            <div className="space-y-1.5">
+              <Label className="text-[13px] font-medium text-muted-foreground">Added By <span className="text-red-500">*</span></Label>
+              <Input value={form.added_by} onChange={(event) => setForm({ ...form, added_by: event.target.value })} placeholder="Admin User" className="rounded-xl border-input bg-background text-foreground text-[13px]" />
             </div>
-            <div className="grid grid-cols-2 gap-3 pt-3">
-              <Button variant="outline" onClick={() => setDrawerOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-                Save Expense
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button variant="outline" className="rounded-xl border-input bg-background text-foreground hover:bg-accent" onClick={() => setDrawerOpen(false)}>Cancel</Button>
+              <Button className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Saving..." : "Save Expense"}
               </Button>
             </div>
           </div>
@@ -598,19 +504,19 @@ export function ExpensePage() {
 function SummaryCard({ card }: { card: ReturnType<typeof buildCards>[number] }) {
   const Icon = card.icon;
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <div className="group rounded-2xl border border-border bg-card p-5 shadow-card card-hover cursor-default">
       <div className="flex items-start justify-between gap-3">
-        <div className={cn("grid h-12 w-12 place-items-center rounded-full", card.iconTone)}>
+        <div className={cn("grid h-11 w-11 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105", card.iconTone)}>
           <Icon className="h-5 w-5" />
         </div>
         <Sparkline values={card.trend} color={card.color} />
       </div>
-      <div className="mt-3 text-sm font-semibold" style={{ color: card.color }}>
+      <div className="mt-3 text-[12px] font-semibold uppercase tracking-wide" style={{ color: card.color }}>
         {card.label}
       </div>
-      <div className="mt-4 text-2xl font-bold">{formatMoney(card.value)}</div>
-      <div className={cn("mt-2 text-xs", card.percent >= 0 ? "text-emerald-600" : "text-rose-600")}>
-        {card.percent >= 0 ? "↑" : "↓"} {Math.abs(card.percent).toFixed(1)}% from last month
+      <div className="mt-2 text-2xl font-bold text-foreground">{formatMoney(card.value)}</div>
+      <div className={cn("mt-1.5 text-[11px] font-medium", card.percent >= 0 ? "text-emerald-500" : "text-rose-500")}>
+        {card.percent >= 0 ? "↑" : "↓"} {Math.abs(card.percent).toFixed(1)}% vs last month
       </div>
     </div>
   );
@@ -620,11 +526,11 @@ function MonthPicker({ selectedMonth, onSelect }: { selectedMonth: Date; onSelec
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2 sm:w-auto">
-          <CalendarDays className="h-4 w-4" /> {monthLabel(selectedMonth)}
+        <Button variant="outline" className="w-full justify-start gap-2 sm:w-auto rounded-xl border-input bg-card hover:bg-accent text-foreground text-[13px] h-9">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" /> {monthLabel(selectedMonth)}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[70] w-auto p-0" align="start">
+      <PopoverContent className="z-[70] w-auto p-0 rounded-2xl border-border bg-card" align="start">
         <Calendar mode="single" selected={selectedMonth} onSelect={onSelect} initialFocus />
       </PopoverContent>
     </Popover>
@@ -649,27 +555,27 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
 
 function CategoryBadge({ category }: { category: ExpenseCategory }) {
   const tone = {
-    grocery: "bg-emerald-50 text-emerald-700",
-    staff_salary: "bg-blue-50 text-blue-700",
-    electricity_bill: "bg-orange-50 text-orange-700",
-    water_bill: "bg-sky-50 text-sky-700",
-    gas_cylinder: "bg-amber-50 text-amber-700",
-    maintenance: "bg-cyan-50 text-cyan-700",
-    cleaning: "bg-purple-50 text-purple-700",
-    utensils: "bg-stone-100 text-stone-700",
-    other: "bg-rose-50 text-rose-700",
+    grocery: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+    staff_salary: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+    electricity_bill: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
+    water_bill: "bg-sky-500/10 text-sky-500 border border-sky-500/20",
+    gas_cylinder: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
+    maintenance: "bg-cyan-500/10 text-cyan-500 border border-cyan-500/20",
+    cleaning: "bg-purple-500/10 text-purple-500 border border-purple-500/20",
+    utensils: "bg-stone-500/10 text-stone-500 border border-stone-500/20",
+    other: "bg-rose-500/10 text-rose-500 border border-rose-500/20",
   }[category];
-  return <span className={cn("rounded-md px-2 py-1 text-xs font-semibold", tone)}>{categoryLabel(category)}</span>;
+  return <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold", tone)}>{categoryLabel(category)}</span>;
 }
 
 function PaymentBadge({ method }: { method: PaymentMethod }) {
   const tone = {
-    cash: "bg-emerald-50 text-emerald-700",
-    upi: "bg-violet-50 text-violet-700",
-    bank_transfer: "bg-blue-50 text-blue-700",
-    card: "bg-rose-50 text-rose-700",
+    cash: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+    upi: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
+    bank_transfer: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+    card: "bg-rose-500/10 text-rose-500 border border-rose-500/20",
   }[method];
-  return <span className={cn("rounded-md px-2 py-1 text-xs font-semibold", tone)}>{paymentMethodLabel(method)}</span>;
+  return <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold", tone)}>{paymentMethodLabel(method)}</span>;
 }
 
 function buildCards(currentExpenses: Expense[], previousExpenses: Expense[], allExpenses: Expense[], selectedMonth: Date) {
@@ -677,36 +583,36 @@ function buildCards(currentExpenses: Expense[], previousExpenses: Expense[], all
     {
       label: "Total Expenses",
       icon: Wallet,
-      color: "#7C3AED",
-      iconTone: "bg-violet-100 text-violet-700",
+      color: "#8B5CF6",
+      iconTone: "bg-violet-500/10 text-violet-500",
       filter: () => true,
     },
     {
       label: "Grocery Expenses",
       icon: ShoppingCart,
-      color: "#059669",
-      iconTone: "bg-emerald-100 text-emerald-700",
+      color: "#10B981",
+      iconTone: "bg-emerald-500/10 text-emerald-500",
       filter: (expense: Expense) => expense.category === "grocery",
     },
     {
       label: "Staff Salary",
       icon: Users,
-      color: "#2563EB",
-      iconTone: "bg-blue-100 text-blue-700",
+      color: "#3B82F6",
+      iconTone: "bg-blue-500/10 text-blue-500",
       filter: (expense: Expense) => expense.category === "staff_salary",
     },
     {
       label: "Utility Bills",
       icon: Zap,
       color: "#F97316",
-      iconTone: "bg-orange-100 text-orange-700",
+      iconTone: "bg-orange-500/10 text-orange-500",
       filter: (expense: Expense) => utilityCategories.includes(expense.category),
     },
     {
       label: "Other Expenses",
       icon: MoreHorizontal,
-      color: "#DB2777",
-      iconTone: "bg-pink-100 text-pink-700",
+      color: "#EC4899",
+      iconTone: "bg-pink-500/10 text-pink-500",
       filter: (expense: Expense) =>
         expense.category !== "grocery" &&
         expense.category !== "staff_salary" &&

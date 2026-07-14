@@ -98,7 +98,6 @@ function AttendancePage() {
         breakfast_status: (m.meal_plan.includes("breakfast") || m.meal_plan === "all" ? "present" : "not_marked") as Status,
         updated_at: new Date().toISOString(),
       }));
-
       const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "member_id,date" });
       if (error) throw error;
     },
@@ -113,112 +112,132 @@ function AttendancePage() {
     const breakfast = records.filter((r) => r.breakfast_status === "present").length;
     const lunch = records.filter((r) => r.lunch_status === "present").length;
     const dinner = records.filter((r) => r.dinner_status === "present").length;
-
     const absent = members.reduce((acc, m) => {
       const rec = recordByMember.get(m.id);
       const isBreakfastAbsent = (m.meal_plan.includes("breakfast") || m.meal_plan === "all") && rec?.breakfast_status === "absent";
       const isLunchAbsent = (m.meal_plan.includes("lunch") || m.meal_plan === "all") && rec?.lunch_status === "absent";
       const isDinnerAbsent = (m.meal_plan.includes("dinner") || m.meal_plan === "all") && rec?.dinner_status === "absent";
-
-      return acc + 
-        (isBreakfastAbsent ? 1 : 0) + 
-        (isLunchAbsent ? 1 : 0) + 
-        (isDinnerAbsent ? 1 : 0);
+      return acc + (isBreakfastAbsent ? 1 : 0) + (isLunchAbsent ? 1 : 0) + (isDinnerAbsent ? 1 : 0);
     }, 0);
-
     return { breakfast, lunch, dinner, absent };
   }, [records, members, recordByMember]);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-card px-4 py-4 sm:px-6">
+    <div className="page-enter flex min-h-screen flex-col">
+      {/* ── Header ──────────────────────────────────── */}
+      <header className="border-b border-border bg-card px-6 py-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold">Attendance</h1>
-            <p className="text-sm text-muted-foreground">Mark today's breakfast, lunch and dinner attendance</p>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Attendance</h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              Mark breakfast, lunch and dinner attendance for{" "}
+              {date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <CalendarDays className="h-4 w-4" />
+                <Button variant="outline" className="gap-2 rounded-xl border-input bg-card hover:bg-accent text-foreground text-[13px] font-medium h-9">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
                   {date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
+              <PopoverContent className="w-auto p-0 rounded-2xl border-border bg-card" align="end">
                 <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
               </PopoverContent>
             </Popover>
             <Button
               onClick={() => markAll.mutate()}
               disabled={markAll.isPending}
-              className="gap-2 bg-success text-success-foreground hover:bg-success/90"
+              className="gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-semibold h-9 shadow-sm"
             >
               <CheckCheck className="h-4 w-4" /> Mark All Present
             </Button>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
-          <Tile label="Breakfast present" value={counts.breakfast} tone="bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-300" />
-          <Tile label="Lunch present" value={counts.lunch} tone="bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300" />
-          <Tile label="Dinner present" value={counts.dinner} tone="bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300" />
-          <Tile label="Missed Meals" value={counts.absent} tone="bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300" />
+        {/* Summary tiles */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-4">
+          {[
+            { label: "Breakfast Present", value: counts.breakfast, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
+            { label: "Lunch Present",     value: counts.lunch,     color: "text-indigo-500", bg: "bg-indigo-500/10 border-indigo-500/20" },
+            { label: "Dinner Present",    value: counts.dinner,    color: "text-violet-500", bg: "bg-violet-500/10 border-violet-500/20" },
+            { label: "Missed Meals",      value: counts.absent,    color: "text-rose-500",    bg: "bg-rose-500/10 border-rose-500/20" },
+          ].map((tile) => (
+            <div key={tile.label} className={`rounded-xl border p-3.5 ${tile.bg}`}>
+              <div className={`text-2xl font-bold leading-none ${tile.color}`}>{tile.value}</div>
+              <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">{tile.label}</div>
+            </div>
+          ))}
         </div>
       </header>
 
-      <div className="flex-1 p-4 sm:p-6">
-        <div className="rounded-2xl border border-border bg-card shadow-sm">
-          <div className="flex flex-wrap items-center gap-2 border-b border-border p-3 sm:p-4">
+      {/* ── Table ───────────────────────────────────── */}
+      <div className="flex-1 p-6">
+        <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+          {/* Search bar */}
+          <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
             <div className="relative flex-1 min-w-[220px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name, mobile or room no..."
-                className="h-10 pl-9"
+                className="h-9 pl-9 rounded-xl border-input bg-background text-foreground text-[13px] focus-visible:ring-indigo-500/20"
               />
             </div>
-            <div className="text-xs text-muted-foreground">
+            <span className="text-[12px] text-muted-foreground font-medium">
               {filtered.length} member{filtered.length !== 1 ? "s" : ""}
-            </div>
+            </span>
           </div>
 
           {/* Desktop table */}
           <div className="hidden md:block">
-            <div className="max-h-[calc(100vh-340px)] overflow-y-auto">
+            <div className="max-h-[calc(100vh-380px)] overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+                <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left">Member</th>
-                    <th className="px-4 py-3 text-left">Room</th>
-                    <th className="px-4 py-3 text-left">Plan</th>
-                    <th className="px-4 py-3 text-center">Breakfast</th>
-                    <th className="px-4 py-3 text-center">Lunch</th>
-                    <th className="px-4 py-3 text-center">Dinner</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Member</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Room</th>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Plan</th>
+                    <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-amber-500">
+                      <span className="inline-flex items-center gap-1"><Utensils className="h-3.5 w-3.5" />Breakfast</span>
+                    </th>
+                    <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-indigo-500">
+                      <span className="inline-flex items-center gap-1"><Soup className="h-3.5 w-3.5" />Lunch</span>
+                    </th>
+                    <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-violet-500">
+                      <span className="inline-flex items-center gap-1"><Sandwich className="h-3.5 w-3.5" />Dinner</span>
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/50">
                   {filtered.map((m) => {
                     const rec = recordByMember.get(m.id);
                     const breakfastEnabled = m.meal_plan.includes("breakfast") || m.meal_plan === "all";
                     const lunchEnabled = m.meal_plan.includes("lunch") || m.meal_plan === "all";
                     const dinnerEnabled = m.meal_plan.includes("dinner") || m.meal_plan === "all";
                     return (
-                      <tr key={m.id} className="border-t border-border">
+                      <tr key={m.id} className="hover:bg-muted/50 transition-colors">
                         <td className="px-4 py-3">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <Avatar className="h-9 w-9 shrink-0">
-                              <AvatarFallback className={cn("text-xs font-semibold", avatarColor(m.id))}>{initials(m.name)}</AvatarFallback>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8 shrink-0">
+                              <AvatarFallback className={cn("text-[11px] font-semibold", avatarColor(m.id))}>
+                                {initials(m.name)}
+                              </AvatarFallback>
                             </Avatar>
-                            <div className="min-w-0">
-                              <div className="truncate font-medium">{m.name}</div>
-                              <div className="truncate text-xs text-muted-foreground">{m.mobile}</div>
+                            <div>
+                              <div className="text-[13px] font-medium text-foreground">{m.name}</div>
+                              <div className="text-[11px] text-muted-foreground">{m.mobile}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">{m.room_number}</td>
-                        <td className="px-4 py-3 capitalize">{m.meal_plan.replace("_", " + ")}</td>
+                        <td className="px-4 py-3 text-[13px] text-muted-foreground">{m.room_number}</td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex rounded-full bg-indigo-500/10 px-2 py-0.5 text-[11px] font-medium text-indigo-500 capitalize">
+                            {m.meal_plan.replace(/_/g, " + ")}
+                          </span>
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <StatusToggle
                             status={breakfastEnabled ? (rec?.breakfast_status ?? "not_marked") : "not_marked"}
@@ -244,7 +263,11 @@ function AttendancePage() {
                     );
                   })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">No members found.</td></tr>
+                    <tr>
+                      <td colSpan={6} className="px-4 py-12 text-center text-[13px] text-muted-foreground">
+                        No members found.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -252,62 +275,50 @@ function AttendancePage() {
           </div>
 
           {/* Mobile cards */}
-          <ul className="md:hidden divide-y divide-border">
+          <ul className="md:hidden divide-y divide-border/50">
             {filtered.map((m) => {
               const rec = recordByMember.get(m.id);
               const breakfastEnabled = m.meal_plan.includes("breakfast") || m.meal_plan === "all";
               const lunchEnabled = m.meal_plan.includes("lunch") || m.meal_plan === "all";
               const dinnerEnabled = m.meal_plan.includes("dinner") || m.meal_plan === "all";
               return (
-                <li key={m.id} className="p-3">
-                  <div className="flex min-w-0 items-center gap-3">
+                <li key={m.id} className="p-4">
+                  <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarFallback className={cn("text-xs font-semibold", avatarColor(m.id))}>{initials(m.name)}</AvatarFallback>
+                      <AvatarFallback className={cn("text-xs font-semibold", avatarColor(m.id))}>
+                        {initials(m.name)}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold">{m.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        {m.mobile} · Room {m.room_number} · <span className="capitalize">{m.meal_plan.replace("_", " + ")}</span>
+                      <div className="text-[13px] font-semibold text-foreground">{m.name}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {m.mobile} · Room {m.room_number}
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-1 gap-2 min-[400px]:grid-cols-3">
-                    <div className="rounded-lg border border-border p-2">
-                      <div className="mb-1 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-[oklch(var(--breakfast))]">
-                        <Utensils className="h-3 w-3" /> Breakfast
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Breakfast", icon: Utensils, enabled: breakfastEnabled, status: rec?.breakfast_status ?? "not_marked", field: "breakfast_status" as const, accent: "text-amber-500" },
+                      { label: "Lunch",     icon: Soup,     enabled: lunchEnabled,     status: rec?.lunch_status ?? "not_marked",     field: "lunch_status" as const,     accent: "text-indigo-500" },
+                      { label: "Dinner",    icon: Sandwich, enabled: dinnerEnabled,    status: rec?.dinner_status ?? "not_marked",    field: "dinner_status" as const,    accent: "text-violet-500" },
+                    ].map((meal) => (
+                      <div key={meal.label} className="rounded-xl border border-border p-2.5 bg-muted/30">
+                        <div className={`mb-2 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide ${meal.accent}`}>
+                          <meal.icon className="h-3 w-3" /> {meal.label}
+                        </div>
+                        <StatusToggle
+                          status={meal.enabled ? (meal.status as Status) : "not_marked"}
+                          disabled={!meal.enabled}
+                          onChange={(v) => setMark.mutate({ memberId: m.id, field: meal.field, value: v })}
+                        />
                       </div>
-                      <StatusToggle
-                        status={breakfastEnabled ? (rec?.breakfast_status ?? "not_marked") : "not_marked"}
-                        disabled={!breakfastEnabled}
-                        onChange={(v) => setMark.mutate({ memberId: m.id, field: "breakfast_status", value: v })}
-                      />
-                    </div>
-                    <div className="rounded-lg border border-border p-2">
-                      <div className="mb-1 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-[oklch(var(--lunch))]">
-                        <Soup className="h-3 w-3" /> Lunch
-                      </div>
-                      <StatusToggle
-                        status={lunchEnabled ? (rec?.lunch_status ?? "not_marked") : "not_marked"}
-                        disabled={!lunchEnabled}
-                        onChange={(v) => setMark.mutate({ memberId: m.id, field: "lunch_status", value: v })}
-                      />
-                    </div>
-                    <div className="rounded-lg border border-border p-2">
-                      <div className="mb-1 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-[oklch(var(--dinner))]">
-                        <Sandwich className="h-3 w-3" /> Dinner
-                      </div>
-                      <StatusToggle
-                        status={dinnerEnabled ? (rec?.dinner_status ?? "not_marked") : "not_marked"}
-                        disabled={!dinnerEnabled}
-                        onChange={(v) => setMark.mutate({ memberId: m.id, field: "dinner_status", value: v })}
-                      />
-                    </div>
+                    ))}
                   </div>
                 </li>
               );
             })}
             {filtered.length === 0 && (
-              <li className="px-4 py-10 text-center text-sm text-muted-foreground">No members found.</li>
+              <li className="px-4 py-12 text-center text-[13px] text-muted-foreground">No members found.</li>
             )}
           </ul>
         </div>
@@ -316,31 +327,29 @@ function AttendancePage() {
   );
 }
 
-function Tile({ label, value, tone }: { label: string; value: number; tone: string }) {
-  return (
-    <div className={`rounded-2xl border border-border p-3 ${tone}`}>
-      <div className="text-xl font-bold leading-tight">{value}</div>
-      <div className="text-xs font-medium uppercase tracking-wide opacity-80">{label}</div>
-    </div>
-  );
-}
-
-function StatusToggle({ status, disabled, onChange }: { status: Status; disabled?: boolean; onChange: (v: Status) => void }) {
-  if (disabled) return <span className="text-xs text-muted-foreground">N/A</span>;
+/* ── Status Toggle ──────────────────────────────────────────── */
+function StatusToggle({
+  status, disabled, onChange,
+}: {
+  status: Status; disabled?: boolean; onChange: (v: Status) => void;
+}) {
+  if (disabled) {
+    return <span className="text-[11px] text-muted-foreground/50 font-medium">N/A</span>;
+  }
   const next: Status = status === "not_marked" ? "present" : status === "present" ? "absent" : "not_marked";
   return (
     <button
       onClick={() => onChange(next)}
       className={cn(
-        "inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition-all",
-        status === "present" && "border-success/30 bg-success/10 text-success",
-        status === "absent" && "border-destructive/30 bg-destructive/10 text-destructive",
-        status === "not_marked" && "border-dashed border-muted-foreground/30 bg-transparent text-muted-foreground hover:bg-muted",
+        "inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 border",
+        status === "present"   && "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20",
+        status === "absent"    && "bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500/20",
+        status === "not_marked" && "border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground",
       )}
     >
-      {status === "present" && <><Check className="h-3.5 w-3.5" />Present</>}
-      {status === "absent" && <><X className="h-3.5 w-3.5" />Absent</>}
-      {status === "not_marked" && <><Minus className="h-3.5 w-3.5" />Mark</>}
+      {status === "present"    && <><Check className="h-3 w-3" />Present</>}
+      {status === "absent"     && <><X className="h-3 w-3" />Absent</>}
+      {status === "not_marked" && <><Minus className="h-3 w-3" />Mark</>}
     </button>
   );
 }

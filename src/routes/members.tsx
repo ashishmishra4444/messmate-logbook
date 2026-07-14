@@ -118,7 +118,6 @@ function MembersPage() {
 
   const selected = members.find((m) => m.id === selectedId) ?? null;
 
-  // Attendance for selected member (current month + neighbouring data)
   const monthStart = useMemo(() => formatDateISO(viewMonth), [viewMonth]);
   const monthEnd = useMemo(() => {
     const d = new Date(viewMonth);
@@ -143,7 +142,6 @@ function MembersPage() {
     },
   });
 
-  // Lifetime stats
   const { data: allAttendance = [] } = useQuery({
     queryKey: ["attendance-all", selectedId],
     enabled: !!selectedId,
@@ -165,15 +163,12 @@ function MembersPage() {
     const possible = allAttendance.reduce((acc, a) => {
       if (!selected) return acc;
       const plan = selected.meal_plan;
-      
       const breakfastMarked = (plan.includes("breakfast") || plan === "all") && a.breakfast_status !== "not_marked" ? 1 : 0;
       const lunchMarked = (plan.includes("lunch") || plan === "all") && a.lunch_status !== "not_marked" ? 1 : 0;
       const dinnerMarked = (plan.includes("dinner") || plan === "all") && a.dinner_status !== "not_marked" ? 1 : 0;
-
       const slots = (plan.includes("breakfast") || plan === "all" ? 1 : 0) +
                     (plan.includes("lunch") || plan === "all" ? 1 : 0) +
                     (plan.includes("dinner") || plan === "all" ? 1 : 0);
-
       const hasMarked = (breakfastMarked + lunchMarked + dinnerMarked) > 0;
       return acc + (hasMarked ? slots : 0);
     }, 0);
@@ -190,7 +185,6 @@ function MembersPage() {
     return { breakfastDays, lunchDays, dinnerDays, total, pct };
   }, [allAttendance, selected]);
 
-  // Build month rows
   const monthRows = useMemo(() => {
     const rows: { date: Date; iso: string; record?: Attendance }[] = [];
     const d = new Date(viewMonth);
@@ -199,11 +193,7 @@ function MembersPage() {
     while (d.getMonth() === m) {
       const iso = formatDateISO(d);
       const record = monthAttendance.find((a) => a.date === iso);
-      rows.push({
-        date: new Date(d),
-        iso,
-        record,
-      });
+      rows.push({ date: new Date(d), iso, record });
       d.setDate(d.getDate() + 1);
     }
     return rows;
@@ -242,17 +232,10 @@ function MembersPage() {
   const markAllPresent = useMutation({
     mutationFn: async () => {
       const iso = formatDateISO(today);
-
-      const { data: existing = [] } = await supabase
-        .from("attendance")
-        .select("*")
-        .eq("date", iso);
-
+      const { data: existing = [] } = await supabase.from("attendance").select("*").eq("date", iso);
       const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
-
       const rows = members.map((m) => {
         const exist = existingMap.get(m.id);
-
         return {
           member_id: m.id,
           date: iso,
@@ -268,10 +251,7 @@ function MembersPage() {
           updated_at: new Date().toISOString(),
         };
       });
-
-      const { error } = await supabase
-        .from("attendance")
-        .upsert(rows, { onConflict: "member_id,date" });
+      const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "member_id,date" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -285,17 +265,10 @@ function MembersPage() {
   const markAllAbsent = useMutation({
     mutationFn: async () => {
       const iso = formatDateISO(today);
-
-      const { data: existing = [] } = await supabase
-        .from("attendance")
-        .select("*")
-        .eq("date", iso);
-
+      const { data: existing = [] } = await supabase.from("attendance").select("*").eq("date", iso);
       const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
-
       const rows = members.map((m) => {
         const exist = existingMap.get(m.id);
-
         return {
           member_id: m.id,
           date: iso,
@@ -311,10 +284,7 @@ function MembersPage() {
           updated_at: new Date().toISOString(),
         };
       });
-
-      const { error } = await supabase
-        .from("attendance")
-        .upsert(rows, { onConflict: "member_id,date" });
+      const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "member_id,date" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -328,17 +298,10 @@ function MembersPage() {
   const clearAllMarks = useMutation({
     mutationFn: async () => {
       const iso = formatDateISO(today);
-
-      const { data: existing = [] } = await supabase
-        .from("attendance")
-        .select("*")
-        .eq("date", iso);
-
+      const { data: existing = [] } = await supabase.from("attendance").select("*").eq("date", iso);
       const existingMap = new Map(existing?.map((r) => [r.member_id, r]) || []);
-
       const rows = members.map((m) => {
         const exist = existingMap.get(m.id);
-
         return {
           member_id: m.id,
           date: iso,
@@ -348,10 +311,7 @@ function MembersPage() {
           updated_at: new Date().toISOString(),
         };
       });
-
-      const { error } = await supabase
-        .from("attendance")
-        .upsert(rows, { onConflict: "member_id,date" });
+      const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "member_id,date" });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -373,15 +333,11 @@ function MembersPage() {
       setConfirmDeleteOpen(false);
       qc.invalidateQueries({ queryKey: ["members"] });
       setSelectedId((currentId) => {
-        if (currentId && selectedIds.includes(currentId)) {
-          return null;
-        }
+        if (currentId && selectedIds.includes(currentId)) return null;
         return currentId;
       });
     },
-    onError: (e: Error) => {
-      toast.error(e.message || "Failed to delete member(s).");
-    },
+    onError: (e: Error) => toast.error(e.message || "Failed to delete member(s)."),
   });
 
   const exportPDF = () => {
@@ -406,283 +362,227 @@ function MembersPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-0px)] min-h-screen flex-col">
-      {/* Header */}
-      <header className="flex flex-col gap-4 border-b border-border bg-card px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:flex-wrap">
-        <div className="min-w-0">
-          <h1 className="truncate text-2xl font-bold tracking-tight">Members</h1>
-          <p className="text-sm text-muted-foreground">Manage members and their attendance</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <CalendarDays className="h-4 w-4" />
-                {today.toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-                <ChevR className="h-3.5 w-3.5 opacity-60" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar mode="single" selected={today} onSelect={(d) => d && setToday(d)} />
-            </PopoverContent>
-          </Popover>
+    <div className="page-enter flex h-[calc(100vh-0px)] min-h-screen flex-col">
+      {/* ── Header ──────────────────────────────────── */}
+      <header className="border-b border-border bg-card px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Members</h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">Manage members and their attendance notebook</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="gap-2 rounded-xl text-[13px] font-medium h-9 bg-card">
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  {today.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                  <ChevR className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 rounded-2xl" align="end">
+                <Calendar mode="single" selected={today} onSelect={(d) => d && setToday(d)} />
+              </PopoverContent>
+            </Popover>
 
-          <Tabs value={viewMeal} onValueChange={(v) => setViewMeal(v as "breakfast" | "lunch" | "dinner" | "all")}>
-            <TabsList className="bg-muted">
-              <TabsTrigger
-                value="breakfast"
-                className="gap-1.5 data-[state=active]:text-[oklch(var(--breakfast))]"
-              >
-                <Utensils className="h-4 w-4" />
-                Breakfast
-              </TabsTrigger>
-              <TabsTrigger
-                value="lunch"
-                className="gap-1.5 data-[state=active]:text-[oklch(var(--lunch))]"
-              >
-                <Soup className="h-4 w-4" />
-                Lunch
-              </TabsTrigger>
-              <TabsTrigger
-                value="dinner"
-                className="gap-1.5 data-[state=active]:text-[oklch(var(--dinner))]"
-              >
-                <Sandwich className="h-4 w-4" />
-                Dinner
-              </TabsTrigger>
-              <TabsTrigger
-                value="all"
-                className="gap-1.5 data-[state=active]:text-primary"
-              >
-                <CheckCheck className="h-4 w-4" />
-                All
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+            <Tabs value={viewMeal} onValueChange={(v) => setViewMeal(v as "breakfast" | "lunch" | "dinner" | "all")}>
+              <TabsList className="bg-muted rounded-xl h-9">
+                <TabsTrigger value="breakfast" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:text-amber-500 data-[state=active]:shadow-sm gap-1.5">
+                  <Utensils className="h-3.5 w-3.5" />Breakfast
+                </TabsTrigger>
+                <TabsTrigger value="lunch" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:text-indigo-500 data-[state=active]:shadow-sm gap-1.5">
+                  <Soup className="h-3.5 w-3.5" />Lunch
+                </TabsTrigger>
+                <TabsTrigger value="dinner" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:text-violet-500 data-[state=active]:shadow-sm gap-1.5">
+                  <Sandwich className="h-3.5 w-3.5" />Dinner
+                </TabsTrigger>
+                <TabsTrigger value="all" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm gap-1.5">
+                  <CheckCheck className="h-3.5 w-3.5" />All
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-          <Button
-            onClick={() => markAllPresent.mutate()}
-            disabled={markAllPresent.isPending}
-            className="gap-2 bg-success text-success-foreground hover:bg-success/90"
-          >
-            <CheckCheck className="h-4 w-4" /> Mark All Present
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" disabled={members.length === 0}>
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                className="text-rose-500 focus:text-rose-600 focus:bg-rose-500/10 cursor-pointer gap-2"
-                onClick={() => markAllAbsent.mutate()}
-                disabled={markAllAbsent.isPending}
-              >
-                <X className="h-4 w-4" /> Mark All Absent
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onClick={() => clearAllMarks.mutate()}
-                disabled={clearAllMarks.isPending}
-              >
-                <Minus className="h-4 w-4" /> Clear Today's Marks
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <Button
+              onClick={() => markAllPresent.mutate()}
+              disabled={markAllPresent.isPending}
+              className="gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-semibold h-9 shadow-sm"
+            >
+              <CheckCheck className="h-4 w-4" /> Mark All Present
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" disabled={members.length === 0} className="rounded-xl h-9 w-9 bg-card">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 rounded-xl bg-card">
+                <DropdownMenuItem className="text-red-500 cursor-pointer gap-2 focus:bg-red-500/10 focus:text-red-500" onClick={() => markAllAbsent.mutate()} disabled={markAllAbsent.isPending}>
+                  <X className="h-4 w-4" /> Mark All Absent
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer gap-2 focus:bg-secondary" onClick={() => clearAllMarks.mutate()} disabled={clearAllMarks.isPending}>
+                  <Minus className="h-4 w-4" /> Clear Today's Marks
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
-      <div className="grid flex-1 min-h-0 grid-cols-1 gap-4 p-4 sm:p-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-        {/* LEFT: members list */}
-        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="flex items-center gap-2">
+      <div className="grid flex-1 min-h-0 grid-cols-1 gap-5 p-4 sm:p-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        {/* ── LEFT: Member List ────────────────────── */}
+        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+          {/* Search + Actions */}
+          <div className="flex items-center gap-2 p-3 border-b border-border bg-card">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, mobile or room no..."
-                className="h-10 pl-9"
+                placeholder="Search members..."
+                className="h-9 pl-9 rounded-xl bg-background text-[13px] border-input focus-visible:ring-primary text-foreground"
               />
             </div>
-            <Button onClick={() => setAddOpen(true)} className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Add
+            <Button
+              onClick={() => setAddOpen(true)}
+              className="gap-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-[13px] h-9 shadow-sm"
+            >
+              <Plus className="h-4 w-4" /> Add
             </Button>
             <Button
               variant="destructive"
               disabled={selectedIds.length === 0}
               onClick={() => setConfirmDeleteOpen(true)}
-              className="gap-1.5 bg-[#EF4444] hover:bg-[#EF4444]/90 text-white"
+              className="gap-1.5 rounded-xl text-[13px] h-9"
             >
               <Trash2 className="h-4 w-4" />
-              Delete{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+              {selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
             </Button>
           </div>
 
-          <div className="mt-3 text-xs font-medium text-muted-foreground">
-            Total Members: <span className="text-foreground">{members.length}</span>
+          <div className="px-3 py-2 border-b border-border bg-muted/30">
+            <span className="text-[12px] text-muted-foreground font-medium">
+              {members.length} member{members.length !== 1 ? "s" : ""}
+            </span>
           </div>
 
-          <ScrollArea className="mt-3 -mx-2 flex-1 px-2">
-            <ul className="flex flex-col gap-2 pb-2">
+          <ScrollArea className="flex-1">
+            <ul className="p-2 flex flex-col gap-1">
               {filtered.map((m) => {
                 const active = m.id === selectedId;
                 return (
                   <li key={m.id}>
                     <div
                       className={cn(
-                        "grid w-full grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-transparent p-3 text-left transition-all",
-                        active ? "border-primary/40 bg-accent shadow-sm" : "hover:bg-muted/60",
+                        "grid w-full grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2.5 rounded-xl p-2.5 transition-all duration-150 cursor-pointer",
+                        active
+                          ? "bg-primary/10 border border-primary/20"
+                          : "hover:bg-muted/50 border border-transparent",
                       )}
                     >
                       <Checkbox
                         checked={selectedIds.includes(m.id)}
                         onCheckedChange={() => {
                           setSelectedIds((prev) =>
-                            prev.includes(m.id)
-                              ? prev.filter((id) => id !== m.id)
-                              : [...prev, m.id],
+                            prev.includes(m.id) ? prev.filter((id) => id !== m.id) : [...prev, m.id],
                           );
                         }}
                       />
                       <button
                         onClick={() => setSelectedId(m.id)}
-                        className="col-span-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 w-full text-left"
+                        className="col-span-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 w-full text-left"
                       >
-                        <Avatar className="h-10 w-10 shrink-0">
-                          <AvatarFallback
-                            className={cn("text-xs font-semibold", avatarColor(m.id))}
-                          >
+                        <Avatar className="h-9 w-9 shrink-0">
+                          <AvatarFallback className={cn("text-[11px] font-semibold", avatarColor(m.id))}>
                             {initials(m.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold">{m.name}</div>
-                          <div className="truncate text-xs text-muted-foreground">
-                            <span>{m.mobile}</span>
-                            <span className="mx-1.5 opacity-50">•</span>
-                            <span>Room {m.room_number}</span>
-                            {m.member_code && (
-                              <>
-                                <span className="mx-1.5 opacity-50">•</span>
-                                <span>#{m.member_code}</span>
-                              </>
-                            )}
+                          <div className={cn("truncate text-[13px] font-semibold", active ? "text-primary" : "text-foreground")}>
+                            {m.name}
+                          </div>
+                          <div className={cn("truncate text-[11px]", active ? "text-primary/70" : "text-muted-foreground")}>
+                            {m.mobile} · Room {m.room_number}
+                            {m.member_code && <span className="opacity-60"> · #{m.member_code}</span>}
                           </div>
                         </div>
-                        <ChevronRight
-                          className={cn(
-                            "h-4 w-4 shrink-0 transition-colors",
-                            active ? "text-primary" : "text-muted-foreground/40",
-                          )}
-                        />
+                        <ChevronRight className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-primary" : "text-muted-foreground/30")} />
                       </button>
                     </div>
                   </li>
                 );
               })}
               {filtered.length === 0 && (
-                <li className="px-2 py-8 text-center text-sm text-muted-foreground">
-                  No members found.
-                </li>
+                <li className="py-10 text-center text-[13px] text-gray-400">No members found.</li>
               )}
             </ul>
           </ScrollArea>
         </section>
 
-        {/* RIGHT: member detail */}
-        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-sm">
+        {/* ── RIGHT: Notebook ──────────────────────── */}
+        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-card-md overflow-hidden relative">
           {selected ? (
             <>
-              {/* Header */}
-              <div className="grid grid-cols-1 gap-4 border-b border-border p-5 xl:grid-cols-[minmax(240px,1fr)_auto]">
-                <div className="flex min-w-0 items-start justify-between gap-4 w-full">
-                  <div className="flex min-w-0 items-start gap-4">
-                    <Avatar className="h-14 w-14 shrink-0">
-                      <AvatarFallback className={cn("text-base font-bold", avatarColor(selected.id))}>
+              {/* Member info header */}
+              <div className="border-b border-border p-5 bg-card relative z-10">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 min-w-0">
+                    <Avatar className="h-12 w-12 shrink-0">
+                      <AvatarFallback className={cn("text-sm font-bold shadow-sm", avatarColor(selected.id))}>
                         {initials(selected.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <div className="truncate text-xl font-bold">{selected.name}</div>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Phone className="h-3.5 w-3.5" />
-                          {selected.mobile}
+                      <div className="text-xl font-bold text-foreground truncate">{selected.name}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Phone className="h-3.5 w-3.5" />{selected.mobile}
                         </span>
-                        <span>Room No. {selected.room_number}</span>
+                        <span>Room {selected.room_number}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          <Utensils className="h-3 w-3" />
+                          {selected.meal_plan.replace(/_/g, " + ")}
+                        </span>
                       </div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        Member Since:{" "}
-                        {new Date(selected.join_date).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                        <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
-                          <Utensils className="h-3 w-3" /> {selected.meal_plan}
-                        </span>
+                      <div className="mt-0.5 text-[11px] text-muted-foreground/60">
+                        Member since{" "}
+                        {new Date(selected.join_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                       </div>
                     </div>
                   </div>
                   <Button
                     variant="outline"
                     size="icon"
-                    className="text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 border-rose-200 shrink-0"
-                    onClick={() => {
-                      setSelectedIds([selected.id]);
-                      setConfirmDeleteOpen(true);
-                    }}
+                    className="rounded-xl text-red-500 hover:bg-red-500/10 hover:text-red-500 border-transparent hover:border-red-500/20 shrink-0 h-9 w-9 bg-muted"
+                    onClick={() => { setSelectedIds([selected.id]); setConfirmDeleteOpen(true); }}
                     title="Delete Member"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-5 w-full max-w-[580px]">
-                  <StatCard
-                    label="Breakfast Days"
-                    value={stats.breakfastDays}
-                    accent="text-[oklch(var(--breakfast))]"
-                    bg="bg-yellow-50/50"
-                  />
-                  <StatCard
-                    label="Lunch Days"
-                    value={stats.lunchDays}
-                    accent="text-[oklch(var(--lunch))]"
-                    bg="bg-orange-50"
-                  />
-                  <StatCard
-                    label="Dinner Days"
-                    value={stats.dinnerDays}
-                    accent="text-[oklch(var(--dinner))]"
-                    bg="bg-blue-50"
-                  />
-                  <StatCard
-                    label="Total Meals"
-                    value={stats.total}
-                    accent="text-emerald-700"
-                    bg="bg-emerald-50"
-                  />
-                  <StatCard
-                    label="Attendance"
-                    value={`${stats.pct}%`}
-                    accent="text-amber-700"
-                    bg="bg-amber-50"
-                  />
+
+                {/* Stat cards */}
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+                  {[
+                    { label: "Breakfast", value: stats.breakfastDays, color: "text-amber-500",  bg: "bg-amber-500/10 border-amber-500/20" },
+                    { label: "Lunch",     value: stats.lunchDays,     color: "text-indigo-500", bg: "bg-indigo-500/10 border-indigo-500/20" },
+                    { label: "Dinner",    value: stats.dinnerDays,    color: "text-violet-500", bg: "bg-violet-500/10 border-violet-500/20" },
+                    { label: "Total",     value: stats.total,         color: "text-emerald-500",bg: "bg-emerald-500/10 border-emerald-500/20" },
+                    { label: "Rate",      value: `${stats.pct}%`,     color: "text-foreground", bg: "bg-muted border-border" },
+                  ].map((s) => (
+                    <div key={s.label} className={`rounded-xl border border-border px-3 py-2.5 text-center ${s.bg}`}>
+                      <div className={`text-xl font-extrabold leading-none ${s.color}`}>{s.value}</div>
+                      <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{s.label}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Month nav */}
-              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+              {/* Month navigation */}
+              <div className="flex items-center justify-between border-b border-border px-5 py-2.5 bg-muted/50 relative z-10">
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="h-8 w-8 rounded-lg hover:bg-secondary"
                   onClick={() => {
                     const d = new Date(viewMonth);
                     d.setMonth(d.getMonth() - 1);
@@ -691,12 +591,13 @@ function MembersPage() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <div className="text-sm font-semibold">
+                <div className="text-[13px] font-semibold text-foreground">
                   {viewMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="h-8 w-8 rounded-lg hover:bg-secondary"
                   onClick={() => {
                     const d = new Date(viewMonth);
                     d.setMonth(d.getMonth() + 1);
@@ -707,27 +608,22 @@ function MembersPage() {
                 </Button>
               </div>
 
-              {/* Notebook table */}
-              <div className="relative min-h-0 flex-1 overflow-hidden">
-                <div className="notebook-rings absolute inset-y-0 left-0 w-6" />
+              {/* ── Notebook Body ──────────────────── */}
+              <div className="relative min-h-0 flex-1 overflow-hidden bg-[var(--color-notebook)] text-slate-800 dark:text-foreground">
+                {/* Spiral rings */}
+                <div className="notebook-rings absolute inset-y-0 left-0 w-7" />
                 <ScrollArea className="h-full">
-                  <div className="notebook-paper min-w-[640px] pl-12 pr-4 pb-6">
-                    <div className="sticky top-0 z-10 grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] border-b border-[var(--color-notebook-line)] bg-[var(--color-notebook)]/95 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+                  <div className="notebook-paper min-w-[600px] pl-10 pr-4 pb-6">
+                    {/* Sticky header row */}
+                    <div className="sticky top-0 z-10 grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] border-b border-[var(--color-notebook-line)] bg-[var(--color-notebook)]/95 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 backdrop-blur">
                       <div>Date</div>
-                      <div className="inline-flex items-center gap-1.5 text-[oklch(var(--breakfast))]">
-                        <Utensils className="h-3.5 w-3.5" />
-                        Breakfast
-                      </div>
-                      <div className="inline-flex items-center gap-1.5 text-[oklch(var(--lunch))]">
-                        <Soup className="h-3.5 w-3.5" />
-                        Lunch
-                      </div>
-                      <div className="inline-flex items-center gap-1.5 text-[oklch(var(--dinner))]">
-                        <Sandwich className="h-3.5 w-3.5" />
-                        Dinner
-                      </div>
+                      <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-500"><Utensils className="h-3 w-3" />Breakfast</div>
+                      <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-500"><Soup className="h-3 w-3" />Lunch</div>
+                      <div className="flex items-center gap-1.5 text-violet-600 dark:text-violet-500"><Sandwich className="h-3 w-3" />Dinner</div>
                       <div>Remarks</div>
                     </div>
+
+                    {/* Day rows */}
                     {monthRows.map((row) => {
                       const isSun = row.date.getDay() === 0;
                       const breakfastEnabled = selected.meal_plan.includes("breakfast") || selected.meal_plan === "all";
@@ -736,67 +632,36 @@ function MembersPage() {
                       return (
                         <div
                           key={row.iso}
-                          className="grid grid-cols-[120px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] items-center border-b border-[var(--color-notebook-line)] py-2 text-sm"
+                          className={cn(
+                            "grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] items-center border-b border-[var(--color-notebook-line)] py-2 text-sm transition-colors",
+                            isSun && "bg-slate-50/50 dark:bg-muted/30",
+                          )}
                         >
-                          <div className={cn("font-medium", isSun && "text-muted-foreground")}>
-                            {row.date.toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                            })}
-                            , {row.date.toLocaleDateString("en-US", { weekday: "short" })}
+                          <div className={cn("text-[12px] font-medium", isSun ? "text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200")}>
+                            {row.date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })},{" "}
+                            <span className={isSun ? "text-slate-400 dark:text-slate-500" : "text-slate-400 dark:text-slate-400"}>
+                              {row.date.toLocaleDateString("en-US", { weekday: "short" })}
+                            </span>
                           </div>
                           <StatusCell
-                            status={
-                              breakfastEnabled
-                                ? (row.record?.breakfast_status ?? "not_marked")
-                                : "not_marked"
-                            }
+                            status={breakfastEnabled ? (row.record?.breakfast_status ?? "not_marked") : "not_marked"}
                             disabled={!breakfastEnabled}
-                            onChange={(v) =>
-                              setMark.mutate({
-                                memberId: selected.id,
-                                date: row.iso,
-                                field: "breakfast_status",
-                                value: v,
-                              })
-                            }
+                            onChange={(v) => setMark.mutate({ memberId: selected.id, date: row.iso, field: "breakfast_status", value: v })}
                             weeklyOff={isSun && !breakfastEnabled}
                           />
                           <StatusCell
-                            status={
-                              lunchEnabled
-                                ? (row.record?.lunch_status ?? "not_marked")
-                                : "not_marked"
-                            }
+                            status={lunchEnabled ? (row.record?.lunch_status ?? "not_marked") : "not_marked"}
                             disabled={!lunchEnabled}
-                            onChange={(v) =>
-                              setMark.mutate({
-                                memberId: selected.id,
-                                date: row.iso,
-                                field: "lunch_status",
-                                value: v,
-                              })
-                            }
+                            onChange={(v) => setMark.mutate({ memberId: selected.id, date: row.iso, field: "lunch_status", value: v })}
                             weeklyOff={isSun && !lunchEnabled}
                           />
                           <StatusCell
-                            status={
-                              dinnerEnabled
-                                ? (row.record?.dinner_status ?? "not_marked")
-                                : "not_marked"
-                            }
+                            status={dinnerEnabled ? (row.record?.dinner_status ?? "not_marked") : "not_marked"}
                             disabled={!dinnerEnabled}
-                            onChange={(v) =>
-                              setMark.mutate({
-                                memberId: selected.id,
-                                date: row.iso,
-                                field: "dinner_status",
-                                value: v,
-                              })
-                            }
+                            onChange={(v) => setMark.mutate({ memberId: selected.id, date: row.iso, field: "dinner_status", value: v })}
                             weeklyOff={isSun && !dinnerEnabled}
                           />
-                          <div className="truncate text-xs text-muted-foreground">
+                          <div className="truncate text-[11px] text-slate-400 dark:text-slate-500">
                             {isSun && !row.record ? "Weekly Off" : (row.record?.remarks ?? "—")}
                           </div>
                         </div>
@@ -806,62 +671,57 @@ function MembersPage() {
                 </ScrollArea>
               </div>
 
-              <div className="grid grid-cols-1 items-center gap-3 border-t border-border p-4 xl:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                  <Legend color="bg-success" label="Present" />
-                  <Legend color="bg-destructive" label="Absent" />
-                  <Legend color="bg-muted-foreground/30" label="Not Applicable" />
+              {/* Notebook footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-5 py-3 relative z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" /> Present
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-red-500" /> Absent
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600" /> Not Applicable
+                  </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="outline" className="gap-2" onClick={() => setSummaryOpen(true)}>
-                    <FileBarChart className="h-4 w-4" /> View Monthly Summary
+                  <Button variant="outline" className="gap-1.5 rounded-xl text-[12px] h-8 bg-card" onClick={() => setSummaryOpen(true)}>
+                    <FileBarChart className="h-3.5 w-3.5" /> Summary
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={exportCSV}>
-                    <FileDown className="h-4 w-4" /> Export CSV
+                  <Button variant="outline" className="gap-1.5 rounded-xl text-[12px] h-8 bg-card" onClick={exportCSV}>
+                    <FileDown className="h-3.5 w-3.5" /> CSV
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={exportPDF}>
-                    <FileDown className="h-4 w-4" /> Export PDF
+                  <Button variant="outline" className="gap-1.5 rounded-xl text-[12px] h-8 bg-card" onClick={exportPDF}>
+                    <FileDown className="h-3.5 w-3.5" /> PDF
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="grid flex-1 place-items-center text-sm text-muted-foreground">
-              Select a member
+            <div className="flex flex-1 items-center justify-center text-[13px] text-muted-foreground bg-muted/10">
+              Select a member to view their notebook
             </div>
           )}
         </section>
       </div>
 
-      <AddMemberDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        onCreated={() => qc.invalidateQueries({ queryKey: ["members"] })}
-      />
-      <MonthlySummaryDialog
-        open={summaryOpen}
-        onOpenChange={setSummaryOpen}
-        member={selected}
-        rows={monthRows}
-        stats={stats}
-      />
+      {/* Dialogs */}
+      <AddMemberDialog open={addOpen} onOpenChange={setAddOpen} onCreated={() => qc.invalidateQueries({ queryKey: ["members"] })} />
+      <MonthlySummaryDialog open={summaryOpen} onOpenChange={setSummaryOpen} member={selected} rows={monthRows} stats={stats} />
       <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Delete Members</DialogTitle>
+            <DialogTitle>Delete Member{selectedIds.length > 1 ? "s" : ""}</DialogTitle>
           </DialogHeader>
-          <div className="py-2 text-sm text-muted-foreground">
-            Are you sure you want to delete the selected member(s)? This action cannot be undone.
+          <div className="py-2 text-[13px] text-gray-500">
+            Are you sure you want to delete {selectedIds.length > 1 ? `these ${selectedIds.length} members` : "this member"}? This action cannot be undone.
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" className="rounded-xl" onClick={() => setConfirmDeleteOpen(false)}>Cancel</Button>
             <Button
-              variant="destructive"
+              className="rounded-xl bg-red-500 hover:bg-red-600 text-white"
               onClick={() => deleteMembers.mutate(selectedIds)}
               disabled={deleteMembers.isPending}
-              className="bg-[#EF4444] hover:bg-[#EF4444]/90 text-white"
             >
               {deleteMembers.isPending ? "Deleting..." : "Delete"}
             </Button>
@@ -872,112 +732,45 @@ function MembersPage() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  accent,
-  bg,
-}: {
-  label: string;
-  value: string | number;
-  accent: string;
-  bg: string;
-}) {
-  return (
-    <div className={cn("rounded-xl border border-border px-2.5 py-3 text-center flex flex-col justify-center min-h-[68px] shadow-sm", bg)}>
-      <div className={cn("text-xl font-extrabold leading-none", accent)}>{value}</div>
-      <div className="mt-1.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground/80 leading-tight">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function Legend({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={cn("inline-block h-2.5 w-2.5 rounded-full", color)} />
-      {label}
-    </span>
-  );
-}
-
-function StatusCell({
-  status,
-  disabled,
-  weeklyOff,
-  onChange,
-}: {
-  status: Status;
-  disabled?: boolean;
-  weeklyOff?: boolean;
-  onChange: (v: Status) => void;
+/* ── StatusCell (Notebook) ──────────────────────────────────── */
+function StatusCell({ status, disabled, weeklyOff, onChange }: {
+  status: Status; disabled?: boolean; weeklyOff?: boolean; onChange: (v: Status) => void;
 }) {
   if (disabled) {
-    return <div className="text-xs text-muted-foreground">{weeklyOff ? "—" : "N/A"}</div>;
+    return <div className="text-[11px] text-muted-foreground/30">{weeklyOff ? "—" : "N/A"}</div>;
   }
-  const next: Status =
-    status === "not_marked" ? "present" : status === "present" ? "absent" : "not_marked";
+  const next: Status = status === "not_marked" ? "present" : status === "present" ? "absent" : "not_marked";
   return (
     <button
       onClick={() => onChange(next)}
       className={cn(
-        "inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition-all",
-        status === "present" && "border-success/30 bg-success/10 text-success",
-        status === "absent" && "border-destructive/30 bg-destructive/10 text-destructive",
-        status === "not_marked" &&
-          "border-dashed border-muted-foreground/30 bg-transparent text-muted-foreground hover:bg-muted",
+        "inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold transition-all duration-150 border",
+        status === "present"    && "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20",
+        status === "absent"     && "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20",
+        status === "not_marked" && "border-dashed border-border bg-transparent text-muted-foreground hover:bg-muted/50",
       )}
     >
-      {status === "present" && (
-        <>
-          <Check className="h-3.5 w-3.5" />
-          Present
-        </>
-      )}
-      {status === "absent" && (
-        <>
-          <X className="h-3.5 w-3.5" />
-          Absent
-        </>
-      )}
-      {status === "not_marked" && (
-        <>
-          <Minus className="h-3.5 w-3.5" />
-          Mark
-        </>
-      )}
+      {status === "present"    && <><Check className="h-3 w-3" />Present</>}
+      {status === "absent"     && <><X className="h-3 w-3" />Absent</>}
+      {status === "not_marked" && <><Minus className="h-3 w-3" />Mark</>}
     </button>
   );
 }
 
-function AddMemberDialog({
-  open,
-  onOpenChange,
-  onCreated,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onCreated: () => void;
+/* ── AddMemberDialog ─────────────────────────────────────────── */
+function AddMemberDialog({ open, onOpenChange, onCreated }: {
+  open: boolean; onOpenChange: (v: boolean) => void; onCreated: () => void;
 }) {
   const [form, setForm] = useState({
-    name: "",
-    mobile: "",
-    room_number: "",
-    meal_plan: "both" as string,
-    member_code: "",
-    id_proof_type: "",
-    id_proof_number: "",
+    name: "", mobile: "", room_number: "", meal_plan: "both" as string,
+    member_code: "", id_proof_type: "", id_proof_number: "",
   });
   const [saving, setSaving] = useState(false);
 
   const { data: rooms = [] } = useQuery({
     queryKey: ["rooms"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("rooms")
-        .select("room_number")
-        .order("room_number");
+      const { data, error } = await (supabase as any).from("rooms").select("room_number").order("room_number");
       if (error) throw error;
       return (data ?? []) as { room_number: string }[];
     },
@@ -999,16 +792,7 @@ function AddMemberDialog({
     [rooms, occupied],
   );
 
-  const reset = () =>
-    setForm({
-      name: "",
-      mobile: "",
-      room_number: "",
-      meal_plan: "both",
-      member_code: "",
-      id_proof_type: "",
-      id_proof_number: "",
-    });
+  const reset = () => setForm({ name: "", mobile: "", room_number: "", meal_plan: "both", member_code: "", id_proof_type: "", id_proof_number: "" });
 
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name is required");
@@ -1017,26 +801,14 @@ function AddMemberDialog({
     if (!form.meal_plan) return toast.error("Please choose a meal plan");
     if (!form.id_proof_type) return toast.error("ID Proof type is required");
     if (!form.id_proof_number.trim()) return toast.error("ID Proof number is required");
-
     setSaving(true);
-
-    const { data, error } = await supabase
-      .from("members")
-      .insert({
-        name: form.name.trim(),
-        mobile: form.mobile,
-        room_number: form.room_number,
-        meal_plan: form.meal_plan as any,
-        member_code: form.member_code.trim() || null,
-        id_proof_type: form.id_proof_type,
-        id_proof_number: form.id_proof_number.trim(),
-      })
-      .select("id")
-      .single();
-
+    const { error } = await supabase.from("members").insert({
+      name: form.name.trim(), mobile: form.mobile, room_number: form.room_number,
+      meal_plan: form.meal_plan as any, member_code: form.member_code.trim() || null,
+      id_proof_type: form.id_proof_type, id_proof_number: form.id_proof_number.trim(),
+    }).select("id").single();
     setSaving(false);
     if (error) return toast.error(error.message);
-
     toast.success("Member added");
     reset();
     onCreated();
@@ -1044,126 +816,66 @@ function AddMemberDialog({
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) reset();
-        onOpenChange(v);
-      }}
-    >
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-[640px]">
+    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[600px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Add Member</DialogTitle>
+          <DialogTitle className="text-lg font-bold">Add New Member</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-3 py-1">
+        <div className="grid gap-4 py-2">
           <div className="grid gap-1.5">
-            <Label>
-              Full name <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="e.g. Rahul Sharma"
-            />
+            <Label className="text-[13px] font-medium text-gray-700">Full Name <span className="text-red-500">*</span></Label>
+            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Rahul Sharma" className="rounded-xl border-gray-200 text-[13px]" />
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="grid min-w-0 gap-1.5">
-              <Label>
-                Mobile number <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={form.mobile}
-                inputMode="numeric"
-                maxLength={10}
-                placeholder="10-digit number"
-                onChange={(e) =>
-                  setForm({ ...form, mobile: e.target.value.replace(/\D/g, "").slice(0, 10) })
-                }
-              />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">Mobile <span className="text-red-500">*</span></Label>
+              <Input value={form.mobile} inputMode="numeric" maxLength={10} placeholder="10-digit number" className="rounded-xl border-gray-200 text-[13px]"
+                onChange={(e) => setForm({ ...form, mobile: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
               {form.mobile.length > 0 && form.mobile.length < 10 && (
-                <span className="text-[11px] text-destructive">
-                  Enter all 10 digits ({form.mobile.length}/10)
-                </span>
+                <span className="text-[11px] text-red-500">{form.mobile.length}/10 digits</span>
               )}
             </div>
-            <div className="grid min-w-0 gap-1.5">
-              <Label>
-                Room No. <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={form.room_number}
-                onValueChange={(v) => setForm({ ...form, room_number: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      availableRooms.length ? "Select an available room" : "No rooms available"
-                    }
-                  />
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">Room No. <span className="text-red-500">*</span></Label>
+              <Select value={form.room_number} onValueChange={(v) => setForm({ ...form, room_number: v })}>
+                <SelectTrigger className="rounded-xl border-gray-200 text-[13px]">
+                  <SelectValue placeholder={availableRooms.length ? "Select room" : "No rooms"} />
                 </SelectTrigger>
-                <SelectContent>
-                  {availableRooms.length === 0 && (
-                    <div className="px-3 py-2 text-xs text-muted-foreground">
-                      All rooms are occupied.
-                    </div>
-                  )}
-                  {availableRooms.map((rn) => (
-                    <SelectItem key={rn} value={rn}>
-                      Room {rn}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="rounded-xl">
+                  {availableRooms.length === 0 && <div className="px-3 py-2 text-[12px] text-gray-400">All rooms occupied.</div>}
+                  {availableRooms.map((rn) => <SelectItem key={rn} value={rn}>Room {rn}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <span className="text-[11px] text-muted-foreground">
-                {availableRooms.length} of {rooms.length} rooms available
-              </span>
+              <span className="text-[11px] text-gray-400">{availableRooms.length} of {rooms.length} available</span>
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="grid min-w-0 gap-1.5">
-              <Label>
-                Meal plan <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={form.meal_plan}
-                onValueChange={(v) => setForm({ ...form, meal_plan: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">Meal Plan <span className="text-red-500">*</span></Label>
+              <Select value={form.meal_plan} onValueChange={(v) => setForm({ ...form, meal_plan: v })}>
+                <SelectTrigger className="rounded-xl border-gray-200 text-[13px]"><SelectValue /></SelectTrigger>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="breakfast">Breakfast only</SelectItem>
                   <SelectItem value="lunch">Lunch only</SelectItem>
                   <SelectItem value="dinner">Dinner only</SelectItem>
                   <SelectItem value="breakfast_lunch">Breakfast + Lunch</SelectItem>
                   <SelectItem value="breakfast_dinner">Breakfast + Dinner</SelectItem>
                   <SelectItem value="lunch_dinner">Lunch + Dinner</SelectItem>
-                  <SelectItem value="all">All Meals (Breakfast + Lunch + Dinner)</SelectItem>
+                  <SelectItem value="all">All Meals</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid min-w-0 gap-1.5">
-              <Label>Member code</Label>
-              <Input
-                value={form.member_code}
-                onChange={(e) => setForm({ ...form, member_code: e.target.value })}
-                placeholder="Optional, e.g. M-101"
-              />
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">Member Code</Label>
+              <Input value={form.member_code} onChange={(e) => setForm({ ...form, member_code: e.target.value })} placeholder="e.g. M-101 (optional)" className="rounded-xl border-gray-200 text-[13px]" />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="grid min-w-0 gap-1.5">
-              <Label>
-                ID Proof type <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={form.id_proof_type}
-                onValueChange={(v) => setForm({ ...form, id_proof_type: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select ID proof" />
-                </SelectTrigger>
-                <SelectContent>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">ID Proof Type <span className="text-red-500">*</span></Label>
+              <Select value={form.id_proof_type} onValueChange={(v) => setForm({ ...form, id_proof_type: v })}>
+                <SelectTrigger className="rounded-xl border-gray-200 text-[13px]"><SelectValue placeholder="Select ID" /></SelectTrigger>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="aadhaar">Aadhaar Card</SelectItem>
                   <SelectItem value="pan">PAN Card</SelectItem>
                   <SelectItem value="voter">Voter ID</SelectItem>
@@ -1173,23 +885,15 @@ function AddMemberDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid min-w-0 gap-1.5">
-              <Label>
-                ID Proof number <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                value={form.id_proof_number}
-                onChange={(e) => setForm({ ...form, id_proof_number: e.target.value })}
-                placeholder="Document number"
-              />
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-medium text-gray-700">ID Number <span className="text-red-500">*</span></Label>
+              <Input value={form.id_proof_number} onChange={(e) => setForm({ ...form, id_proof_number: e.target.value })} placeholder="Document number" className="rounded-xl border-gray-200 text-[13px]" />
             </div>
           </div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={save} disabled={saving}>
+          <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={save} disabled={saving} className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
             {saving ? "Saving..." : "Add Member"}
           </Button>
         </DialogFooter>
@@ -1198,81 +902,53 @@ function AddMemberDialog({
   );
 }
 
-function MonthlySummaryDialog({
-  open,
-  onOpenChange,
-  member,
-  rows,
-  stats,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
+/* ── MonthlySummaryDialog ─────────────────────────────────────── */
+function MonthlySummaryDialog({ open, onOpenChange, member, rows, stats }: {
+  open: boolean; onOpenChange: (v: boolean) => void;
   member: Member | null;
   rows: { date: Date; iso: string; record?: Attendance & { breakfast_status?: Status } }[];
   stats: { breakfastDays: number; lunchDays: number; dinnerDays: number; total: number; pct: number };
 }) {
   if (!member) return null;
   const breakfastPresent = rows.filter((r) => r.record?.breakfast_status === "present").length;
-  const breakfastAbsent = rows.filter((r) => r.record?.breakfast_status === "absent").length;
-  const lunchPresent = rows.filter((r) => r.record?.lunch_status === "present").length;
-  const lunchAbsent = rows.filter((r) => r.record?.lunch_status === "absent").length;
-  const dinnerPresent = rows.filter((r) => r.record?.dinner_status === "present").length;
-  const dinnerAbsent = rows.filter((r) => r.record?.dinner_status === "absent").length;
+  const breakfastAbsent  = rows.filter((r) => r.record?.breakfast_status === "absent").length;
+  const lunchPresent     = rows.filter((r) => r.record?.lunch_status === "present").length;
+  const lunchAbsent      = rows.filter((r) => r.record?.lunch_status === "absent").length;
+  const dinnerPresent    = rows.filter((r) => r.record?.dinner_status === "present").length;
+  const dinnerAbsent     = rows.filter((r) => r.record?.dinner_status === "absent").length;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{member.name} — Monthly Summary</DialogTitle>
+          <DialogTitle className="text-base font-bold">{member.name} — Monthly Summary</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-2 text-sm">
-          <div className="rounded-lg border border-border p-3">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">
-              Breakfast (this month)
+        <div className="grid grid-cols-3 gap-3 py-2">
+          {[
+            { label: "Breakfast", present: breakfastPresent, absent: breakfastAbsent, color: "text-amber-600" },
+            { label: "Lunch",     present: lunchPresent,     absent: lunchAbsent,     color: "text-indigo-600" },
+            { label: "Dinner",    present: dinnerPresent,    absent: dinnerAbsent,    color: "text-violet-600" },
+          ].map((m) => (
+            <div key={m.label} className="rounded-xl border border-gray-100 p-3.5">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{m.label}</div>
+              <div className={`mt-1.5 text-2xl font-bold ${m.color}`}>{m.present}</div>
+              <div className="text-[11px] text-gray-400">present</div>
+              <div className="mt-1 text-[11px] text-red-400">{m.absent} absent</div>
             </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-success">{breakfastPresent}</span>
-              <span className="text-xs text-muted-foreground">present</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-4 gap-2.5">
+          {[
+            { label: "Lifetime Breakfast", value: stats.breakfastDays },
+            { label: "Lifetime Lunch",     value: stats.lunchDays },
+            { label: "Lifetime Dinner",    value: stats.dinnerDays },
+            { label: "Attendance Rate",    value: `${stats.pct}%` },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl bg-gray-50 border border-gray-100 p-3 text-center">
+              <div className="text-lg font-bold text-gray-900">{s.value}</div>
+              <div className="text-[10px] font-medium uppercase tracking-wide text-gray-400 mt-0.5">{s.label}</div>
             </div>
-            <div className="text-xs text-destructive">{breakfastAbsent} absent</div>
-          </div>
-          <div className="rounded-lg border border-border p-3">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">
-              Lunch (this month)
-            </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-success">{lunchPresent}</span>
-              <span className="text-xs text-muted-foreground">present</span>
-            </div>
-            <div className="text-xs text-destructive">{lunchAbsent} absent</div>
-          </div>
-          <div className="rounded-lg border border-border p-3">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">
-              Dinner (this month)
-            </div>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-success">{dinnerPresent}</span>
-              <span className="text-xs text-muted-foreground">present</span>
-            </div>
-            <div className="text-xs text-destructive">{dinnerAbsent} absent</div>
-          </div>
-          <div className="col-span-1 sm:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-lg bg-muted/60 p-3 text-center">
-              <div className="text-xl font-bold">{stats.breakfastDays}</div>
-              <div className="text-[11px] uppercase text-muted-foreground">Lifetime Breakfast</div>
-            </div>
-            <div className="rounded-lg bg-muted/60 p-3 text-center">
-              <div className="text-xl font-bold">{stats.lunchDays}</div>
-              <div className="text-[11px] uppercase text-muted-foreground">Lifetime Lunch</div>
-            </div>
-            <div className="rounded-lg bg-muted/60 p-3 text-center">
-              <div className="text-xl font-bold">{stats.dinnerDays}</div>
-              <div className="text-[11px] uppercase text-muted-foreground">Lifetime Dinner</div>
-            </div>
-            <div className="rounded-lg bg-muted/60 p-3 text-center">
-              <div className="text-xl font-bold">{stats.pct}%</div>
-              <div className="text-[11px] uppercase text-muted-foreground">Attendance</div>
-            </div>
-          </div>
+          ))}
         </div>
       </DialogContent>
     </Dialog>

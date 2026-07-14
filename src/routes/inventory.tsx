@@ -140,83 +140,83 @@ function InventoryPage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-card px-4 py-4 sm:px-6">
+    <div className="page-enter flex min-h-screen flex-col">
+      <header className="border-b border-border bg-card px-6 py-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold">Inventory</h1>
-            <p className="text-sm text-muted-foreground">Manage food stock, utensils, and other mess inventory</p>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Inventory</h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Manage food stock, utensils, and other mess inventory</p>
           </div>
-          <Button onClick={() => setItemDialog({ open: true, item: null })} className="gap-2">
+          <Button onClick={() => setItemDialog({ open: true, item: null })} className="gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-[13px] font-semibold h-9 shadow-sm">
             <Plus className="h-4 w-4" /> Add Item
           </Button>
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <KpiCard icon={Box} label="Total Items" value={items.length} sub="All inventory items" tone="emerald" />
-          <KpiCard icon={IndianRupee} label="Total Stock Value" value={`Rs ${stats.value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`} sub="Current inventory value" tone="sky" />
-          <KpiCard icon={AlertTriangle} label="Low Stock Items" value={stats.low} sub="Below minimum level" tone="amber" />
-          <KpiCard icon={ShieldAlert} label="Out of Stock" value={stats.out} sub="Need immediate attention" tone="rose" />
-          <KpiCard icon={Utensils} label="Total Assets" value={stats.assets} sub="Utensils and other assets" tone="violet" />
+          <KpiCard icon={IndianRupee} label="Stock Value" value={`₹${stats.value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`} sub="Current inventory value" tone="sky" />
+          <KpiCard icon={AlertTriangle} label="Low Stock" value={stats.low} sub="Below minimum level" tone="amber" />
+          <KpiCard icon={ShieldAlert} label="Out of Stock" value={stats.out} sub="Needs attention" tone="rose" />
+          <KpiCard icon={Utensils} label="Total Assets" value={stats.assets} sub="Utensils and assets" tone="violet" />
         </div>
       </header>
 
-      <div className="grid flex-1 gap-4 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid flex-1 gap-5 p-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         {/* MAIN */}
-        <section className="rounded-2xl border border-border bg-card shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-3 sm:p-4">
+        <section className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4 bg-card">
             <Tabs value={tab} onValueChange={(v) => setTab(v as Category)}>
-              <TabsList className="bg-muted/60">
-                <TabsTrigger value="food">Food Stock</TabsTrigger>
-                <TabsTrigger value="utensil">Utensils &amp; Assets</TabsTrigger>
-                <TabsTrigger value="all">All Items</TabsTrigger>
+              <TabsList className="bg-secondary rounded-xl h-9">
+                <TabsTrigger value="food" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm">Food Stock</TabsTrigger>
+                <TabsTrigger value="utensil" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm">Utensils &amp; Assets</TabsTrigger>
+                <TabsTrigger value="all" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm">All Items</TabsTrigger>
               </TabsList>
             </Tabs>
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search items..." className="h-10 pl-9" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search items..." className="h-9 pl-9 rounded-xl bg-background text-[13px] border-input focus-visible:ring-primary text-foreground" />
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
                 <tr>
-                  <th className="px-4 py-3 text-left">Item Name</th>
-                  <th className="px-4 py-3 text-left">Category</th>
-                  <th className="px-4 py-3 text-right">Total Qty</th>
-                  <th className="px-4 py-3 text-right">Available</th>
-                  <th className="px-4 py-3 text-right">Damaged</th>
-                  <th className="px-4 py-3 text-right">Missing</th>
-                  <th className="px-4 py-3 text-left">Unit</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Item Name</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Category</th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Total</th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Available</th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Damaged</th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Missing</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Unit</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border/50">
                 {filtered.map((i) => {
                   const status = Number(i.available_qty) <= 0
-                    ? { label: "Out of Stock", className: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" }
+                    ? { label: "Out of Stock", className: "bg-red-500/10 text-red-500 border border-red-500/20" }
                     : Number(i.available_qty) <= Number(i.min_qty)
-                    ? { label: "Low Stock", className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" }
-                    : { label: "Good", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" };
+                    ? { label: "Low Stock", className: "bg-amber-500/10 text-amber-500 border border-amber-500/20" }
+                    : { label: "Good", className: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" };
                   return (
-                    <tr key={i.id} className="border-t border-border">
-                      <td className="px-4 py-2.5 font-medium">{i.name}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground">{i.subcategory ?? i.category}</td>
-                      <td className="px-4 py-2.5 text-right">{i.total_qty}</td>
-                      <td className="px-4 py-2.5 text-right text-emerald-600 font-semibold">{i.available_qty}</td>
-                      <td className="px-4 py-2.5 text-right text-amber-600">{i.damaged_qty}</td>
-                      <td className="px-4 py-2.5 text-right text-rose-600">{i.missing_qty}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground">{i.unit}</td>
-                      <td className="px-4 py-2.5"><span className={cn("inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold", status.className)}>{status.label}</span></td>
-                      <td className="px-4 py-2.5">
+                    <tr key={i.id} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-4 py-3 text-[13px] font-medium text-foreground">{i.name}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground capitalize">{i.subcategory ?? i.category}</td>
+                      <td className="px-4 py-3 text-right text-[13px] text-muted-foreground">{i.total_qty}</td>
+                      <td className="px-4 py-3 text-right text-[13px] font-bold text-emerald-500">{i.available_qty}</td>
+                      <td className="px-4 py-3 text-right text-[13px] text-amber-500">{i.damaged_qty}</td>
+                      <td className="px-4 py-3 text-right text-[13px] text-red-500">{i.missing_qty}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{i.unit}</td>
+                      <td className="px-4 py-3"><span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold", status.className)}>{status.label}</span></td>
+                      <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setItemDialog({ open: true, item: i })}>
-                            <Pencil className="h-4 w-4" />
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={() => setItemDialog({ open: true, item: i })}>
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-rose-600" onClick={() => { if (confirm(`Delete ${i.name}?`)) deleteItem.mutate(i.id); }}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500" onClick={() => { if (confirm(`Delete ${i.name}?`)) deleteItem.mutate(i.id); }}>
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </td>
@@ -224,7 +224,17 @@ function InventoryPage() {
                   );
                 })}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={9} className="px-4 py-10 text-center text-sm text-muted-foreground">No items.</td></tr>
+                  <tr>
+                    <td colSpan={9} className="px-4 py-16">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                          <Box className="h-6 w-6 text-muted-foreground/50" />
+                        </div>
+                        <p className="text-[13px] font-medium text-foreground">No inventory items</p>
+                        <p className="text-[12px] text-muted-foreground mt-0.5">Add some items or change your filters.</p>
+                      </div>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -232,48 +242,53 @@ function InventoryPage() {
         </section>
 
         {/* SIDE */}
-        <aside className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="inline-flex items-center gap-2 text-sm font-semibold text-amber-700"><AlertTriangle className="h-4 w-4" />Low Stock Alerts</h3>
+        <aside className="flex flex-col gap-5">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="grid h-6 w-6 place-items-center rounded-md bg-amber-500/10">
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+              </div>
+              <h3 className="text-[13px] font-semibold text-foreground">Low Stock Alerts</h3>
             </div>
-            <ul className="mt-3 grid gap-2">
+            <ul className="space-y-1.5">
               {lowStockAlerts.map((i) => (
-                <li key={i.id} className="flex items-center justify-between gap-2 rounded-lg border border-border p-2.5">
+                <li key={i.id} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 p-2.5">
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{i.name}</div>
-                    <div className="text-xs text-muted-foreground">{i.available_qty} remaining</div>
+                    <div className="truncate text-[13px] font-medium text-foreground">{i.name}</div>
+                    <div className="text-[11px] text-muted-foreground">{i.available_qty} {i.unit} left</div>
                   </div>
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Min: {i.min_qty}</span>
+                  <span className="shrink-0 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-500">Min: {i.min_qty}</span>
                 </li>
               ))}
-              {lowStockAlerts.length === 0 && <li className="text-xs text-muted-foreground">All stocked up 🎉</li>}
+              {lowStockAlerts.length === 0 && (
+                <li className="py-4 text-center text-[12px] text-muted-foreground/70">All items stocked up ✓</li>
+              )}
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h3 className="text-sm font-semibold">Quick Actions</h3>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <QuickAction icon={ArrowDownToLine} label="Stock In" desc="Add new stock" tone="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300" onClick={() => setMoveDialog({ open: true, type: "stock_in", item: items[0] ?? null })} />
-              <QuickAction icon={ArrowUpFromLine} label="Stock Out" desc="Record usage" tone="bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" onClick={() => setMoveDialog({ open: true, type: "stock_out", item: items[0] ?? null })} />
-              <QuickAction icon={ArrowUpFromLine} label="Damage" desc="Report damage" tone="bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300" onClick={() => setMoveDialog({ open: true, type: "damage", item: items[0] ?? null })} />
-              <QuickAction icon={Wrench} label="Missing" desc="Report missing" tone="bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300" onClick={() => setMoveDialog({ open: true, type: "missing", item: items[0] ?? null })} />
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+            <h3 className="text-[13px] font-semibold text-foreground mb-3">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <QuickAction icon={ArrowDownToLine} label="Stock In" desc="Add new stock" tone="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" onClick={() => setMoveDialog({ open: true, type: "stock_in", item: items[0] ?? null })} />
+              <QuickAction icon={ArrowUpFromLine} label="Stock Out" desc="Record usage" tone="bg-red-500/10 text-red-500 border-red-500/20" onClick={() => setMoveDialog({ open: true, type: "stock_out", item: items[0] ?? null })} />
+              <QuickAction icon={ArrowUpFromLine} label="Damage" desc="Report damage" tone="bg-orange-500/10 text-orange-500 border-orange-500/20" onClick={() => setMoveDialog({ open: true, type: "damage", item: items[0] ?? null })} />
+              <QuickAction icon={Wrench} label="Missing" desc="Report missing" tone="bg-amber-500/10 text-amber-500 border-amber-500/20" onClick={() => setMoveDialog({ open: true, type: "missing", item: items[0] ?? null })} />
             </div>
           </div>
         </aside>
       </div>
 
       {/* Recent movements */}
-      <div className="grid gap-4 p-4 pt-0 sm:p-6 sm:pt-0 lg:grid-cols-2">
-        <RecentList title="Recent Stock In" icon={ArrowDownToLine} tone="text-emerald-600" rows={recentIn} columns={["Date", "Item", "Quantity", "Supplier", "Total Cost"]}
+      <div className="grid gap-5 p-6 pt-0 lg:grid-cols-2">
+        <RecentList title="Recent Stock In" icon={ArrowDownToLine} tone="text-emerald-500" rows={recentIn} columns={["Date", "Item", "Quantity", "Supplier", "Total Cost"]}
           render={(m) => [
             new Date(m.occurred_at).toLocaleDateString("en-GB"),
             m.inventory_items?.name ?? "—",
             `${m.quantity} ${m.inventory_items?.unit ?? ""}`,
             m.supplier ?? "—",
-            m.total_cost != null ? `Rs ${m.total_cost}` : "—",
+            m.total_cost != null ? `₹${m.total_cost}` : "—",
           ]} />
-        <RecentList title="Recent Stock Out" icon={ArrowUpFromLine} tone="text-rose-600" rows={recentOut} columns={["Date", "Item", "Quantity Used", "Used By", "Purpose"]}
+        <RecentList title="Recent Stock Out" icon={ArrowUpFromLine} tone="text-rose-500" rows={recentOut} columns={["Date", "Item", "Quantity Used", "Used By", "Purpose"]}
           render={(m) => [
             new Date(m.occurred_at).toLocaleDateString("en-GB"),
             m.inventory_items?.name ?? "—",
@@ -306,19 +321,20 @@ function InventoryPage() {
 
 function KpiCard({ icon: Icon, label, value, sub, tone }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string | number; sub: string; tone: "emerald" | "sky" | "amber" | "rose" | "violet" }) {
   const map = {
-    emerald: "from-emerald-100 to-emerald-50 text-emerald-700 dark:from-emerald-950/40 dark:to-emerald-950/10 dark:text-emerald-300",
-    sky: "from-sky-100 to-sky-50 text-sky-700 dark:from-sky-950/40 dark:to-sky-950/10 dark:text-sky-300",
-    amber: "from-amber-100 to-amber-50 text-amber-700 dark:from-amber-950/40 dark:to-amber-950/10 dark:text-amber-300",
-    rose: "from-rose-100 to-rose-50 text-rose-700 dark:from-rose-950/40 dark:to-rose-950/10 dark:text-rose-300",
-    violet: "from-violet-100 to-violet-50 text-violet-700 dark:from-violet-950/40 dark:to-violet-950/10 dark:text-violet-300",
+    emerald: { bg: "bg-emerald-500/10", icon: "text-emerald-500", border: "border-emerald-500/20" },
+    sky:     { bg: "bg-sky-500/10",     icon: "text-sky-500",     border: "border-sky-500/20" },
+    amber:   { bg: "bg-amber-500/10",   icon: "text-amber-500",   border: "border-amber-500/20" },
+    rose:    { bg: "bg-red-500/10",     icon: "text-red-500",     border: "border-red-500/20" },
+    violet:  { bg: "bg-violet-500/10",  icon: "text-violet-500",  border: "border-violet-500/20" },
   } as const;
+  const t = map[tone];
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl border border-border bg-gradient-to-br p-4", map[tone])}>
-      <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/70 dark:bg-white/10">
-        <Icon className="h-6 w-6" />
+    <div className="group flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-card card-hover cursor-default">
+      <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-xl border transition-transform duration-200 group-hover:scale-105", t.bg, t.border)}>
+        <Icon className={cn("h-5 w-5", t.icon)} />
       </div>
       <div className="min-w-0">
-        <div className="truncate text-xs font-medium uppercase tracking-wide opacity-80">{label}</div>
+        <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
         <div className="truncate text-xl font-bold text-foreground">{value}</div>
         <div className="truncate text-[11px] text-muted-foreground">{sub}</div>
       </div>
@@ -328,11 +344,11 @@ function KpiCard({ icon: Icon, label, value, sub, tone }: { icon: React.Componen
 
 function QuickAction({ icon: Icon, label, desc, tone, onClick }: { icon: React.ComponentType<{ className?: string }>; label: string; desc: string; tone: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={cn("flex items-start gap-2 rounded-xl border border-border p-3 text-left transition-all hover:shadow-sm", tone)}>
-      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+    <button onClick={onClick} className={cn("flex items-start gap-2 rounded-xl border p-2.5 text-left transition-all duration-150 hover:shadow-sm hover:scale-[1.02] bg-card hover:bg-accent", tone)}>
+      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
       <div className="min-w-0">
-        <div className="truncate text-sm font-semibold">{label}</div>
-        <div className="truncate text-[11px] opacity-75">{desc}</div>
+        <div className="truncate text-[12px] font-semibold">{label}</div>
+        <div className="truncate text-[10px] opacity-70">{desc}</div>
       </div>
     </button>
   );
@@ -340,21 +356,22 @@ function QuickAction({ icon: Icon, label, desc, tone, onClick }: { icon: React.C
 
 function RecentList<T>({ title, icon: Icon, tone, rows, columns, render }: { title: string; icon: React.ComponentType<{ className?: string }>; tone: string; rows: T[]; columns: string[]; render: (row: T) => (string | number)[] }) {
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between border-b border-border p-3 sm:p-4">
-        <h3 className={cn("inline-flex items-center gap-2 text-sm font-semibold", tone)}><Icon className="h-4 w-4" />{title}</h3>
+    <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-border p-4 bg-card">
+        <Icon className={cn("h-4 w-4", tone)} />
+        <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[480px] text-sm">
-          <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
-            <tr>{columns.map((c) => <th key={c} className="px-4 py-3 text-left">{c}</th>)}</tr>
+          <thead className="bg-card/80 backdrop-blur-sm border-b border-border">
+            <tr>{columns.map((c) => <th key={c} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{c}</th>)}</tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border/50">
             {rows.map((r, i) => {
               const cells = render(r);
-              return <tr key={i} className="border-t border-border">{cells.map((c, j) => <td key={j} className="px-4 py-2.5">{c}</td>)}</tr>;
+              return <tr key={i} className="hover:bg-muted/50 transition-colors">{cells.map((c, j) => <td key={j} className="px-4 py-2.5 text-[13px] text-foreground">{c}</td>)}</tr>;
             })}
-            {rows.length === 0 && <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-sm text-muted-foreground">No entries yet.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-[13px] text-muted-foreground">No entries yet.</td></tr>}
           </tbody>
         </table>
       </div>

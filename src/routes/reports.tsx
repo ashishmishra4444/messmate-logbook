@@ -131,35 +131,35 @@ function ReportsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6">
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold">Reports</h1>
-          <p className="text-sm text-muted-foreground">Kitchen, customer and overall reports for the current month</p>
+    <div className="page-enter min-h-screen p-6">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Reports</h1>
+          <p className="mt-0.5 text-[13px] text-muted-foreground">Kitchen, customer and overall reports for the current month</p>
         </div>
       </header>
 
       {/* Quick stats */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Stat label="Breakfast served" value={overall.breakfast} tone="bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-300" />
-        <Stat label="Lunch served" value={overall.lunch} tone="bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300" />
-        <Stat label="Dinner served" value={overall.dinner} tone="bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300" />
-        <Stat label="Total meals" value={overall.total} tone="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300" />
-        <Stat label="Absences" value={overall.absent} tone="bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Stat label="Breakfast" value={overall.breakfast} tone="bg-amber-500/10 text-amber-500 border-amber-500/20" />
+        <Stat label="Lunch" value={overall.lunch} tone="bg-indigo-500/10 text-indigo-500 border-indigo-500/20" />
+        <Stat label="Dinner" value={overall.dinner} tone="bg-violet-500/10 text-violet-500 border-violet-500/20" />
+        <Stat label="Total Meals" value={overall.total} tone="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" />
+        <Stat label="Absences" value={overall.absent} tone="bg-red-500/10 text-red-500 border-red-500/20" />
       </div>
 
-      <Tabs defaultValue="overall" className="mt-5">
-        <TabsList className="flex w-full flex-wrap justify-start gap-1 bg-muted/60 p-1">
-          <TabsTrigger value="overall" className="gap-2"><BarChart3 className="h-4 w-4" />Overall</TabsTrigger>
-          <TabsTrigger value="kitchen" className="gap-2"><ChefHat className="h-4 w-4" />Kitchen</TabsTrigger>
-          <TabsTrigger value="customer" className="gap-2"><Users className="h-4 w-4" />Customer</TabsTrigger>
+      <Tabs defaultValue="overall" className="mt-6">
+        <TabsList className="bg-muted rounded-xl h-9">
+          <TabsTrigger value="overall" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><BarChart3 className="h-3.5 w-3.5" />Overall</TabsTrigger>
+          <TabsTrigger value="kitchen" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><ChefHat className="h-3.5 w-3.5" />Kitchen</TabsTrigger>
+          <TabsTrigger value="customer" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Users className="h-3.5 w-3.5" />Customer</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overall" className="mt-4">
           <SectionCard title="All attendance entries this month" onExport={exportOverall}>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
-                <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                <thead className="bg-card/80 backdrop-blur-sm border-b border-border text-xs uppercase text-muted-foreground">
                   <tr>
                     <Th>Date</Th><Th>Member</Th><Th>Room</Th><Th>Breakfast</Th><Th>Lunch</Th><Th>Dinner</Th><Th>Remarks</Th>
                   </tr>
@@ -187,7 +187,7 @@ function ReportsPage() {
           <SectionCard title="Meals prepared per day" onExport={exportKitchen}>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] text-sm">
-                <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                <thead className="bg-card/80 backdrop-blur-sm border-b border-border text-xs uppercase text-muted-foreground">
                   <tr><Th>Date</Th><Th right>Breakfast served</Th><Th right>Lunch served</Th><Th right>Dinner served</Th><Th right>Total meals</Th></tr>
                 </thead>
                 <tbody>
@@ -210,7 +210,7 @@ function ReportsPage() {
             <SectionCard title="Inventory movements (stock in / out)">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] text-sm">
-                  <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                  <thead className="bg-card/80 backdrop-blur-sm border-b border-border text-xs uppercase text-muted-foreground">
                     <tr><Th>Date</Th><Th>Item</Th><Th>Type</Th><Th right>Qty</Th><Th>Supplier / Used by</Th><Th>Purpose</Th></tr>
                   </thead>
                   <tbody>
@@ -236,7 +236,7 @@ function ReportsPage() {
           <SectionCard title="Member-wise meals consumed" onExport={exportCustomer}>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px] text-sm">
-                <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
+                <thead className="bg-card/80 backdrop-blur-sm border-b border-border text-xs uppercase text-muted-foreground">
                   <tr><Th>Member</Th><Th>Room</Th><Th>Plan</Th><Th right>Breakfast</Th><Th right>Lunch</Th><Th right>Dinner</Th><Th right>Total</Th><Th right>Absent</Th></tr>
                 </thead>
                 <tbody>
@@ -249,7 +249,7 @@ function ReportsPage() {
                       <Td right className="text-[oklch(var(--lunch))] font-semibold">{m.lunch}</Td>
                       <Td right className="text-[oklch(var(--dinner))] font-semibold">{m.dinner}</Td>
                       <Td right className="font-bold">{m.breakfast + m.lunch + m.dinner}</Td>
-                      <Td right className="text-rose-600">{m.absent}</Td>
+                      <Td right className="text-rose-500">{m.absent}</Td>
                     </tr>
                   ))}
                   {byMember.length === 0 && <EmptyRow cols={8} />}
@@ -265,20 +265,20 @@ function ReportsPage() {
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
-    <div className={`rounded-2xl border border-border p-4 ${tone}`}>
-      <div className="text-2xl font-bold leading-tight">{value}</div>
-      <div className="text-xs font-medium uppercase tracking-wide opacity-80">{label}</div>
+    <div className={`rounded-2xl border border-border p-4 shadow-card bg-card ${tone}`}>
+      <div className="text-2xl font-bold text-foreground leading-tight">{value}</div>
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
     </div>
   );
 }
 
 function SectionCard({ title, onExport, children }: { title: string; onExport?: () => void; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h3 className="text-sm font-semibold">{title}</h3>
+    <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card/80 backdrop-blur-sm px-4 py-3">
+        <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
         {onExport && (
-          <Button size="sm" variant="outline" className="gap-2" onClick={onExport}>
+          <Button size="sm" variant="outline" className="h-8 gap-2 rounded-lg bg-background border-input hover:bg-accent text-foreground text-[12px]" onClick={onExport}>
             <FileDown className="h-3.5 w-3.5" /> Export CSV
           </Button>
         )}
@@ -289,11 +289,11 @@ function SectionCard({ title, onExport, children }: { title: string; onExport?: 
 }
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
-  return <th className={`px-4 py-3 ${right ? "text-right" : "text-left"}`}>{children}</th>;
+  return <th className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground ${right ? "text-right" : "text-left"}`}>{children}</th>;
 }
 function Td({ children, right, className = "" }: { children: React.ReactNode; right?: boolean; className?: string }) {
-  return <td className={`px-4 py-2.5 ${right ? "text-right" : ""} ${className}`}>{children}</td>;
+  return <td className={`px-4 py-3 text-[13px] text-foreground ${right ? "text-right" : ""} ${className}`}>{children}</td>;
 }
 function EmptyRow({ cols }: { cols: number }) {
-  return <tr><td colSpan={cols} className="px-4 py-10 text-center text-sm text-muted-foreground">No records yet for this month.</td></tr>;
+  return <tr><td colSpan={cols} className="px-4 py-12 text-center text-[13px] text-muted-foreground">No records yet for this month.</td></tr>;
 }
