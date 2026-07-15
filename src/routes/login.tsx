@@ -67,7 +67,7 @@ function LoginPage() {
         {/* Logo */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500 shadow-lg shadow-indigo-900/50">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-500 shadow-card-md shadow-indigo-900/50">
               <ChefHat className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white tracking-tight">MessMate</span>

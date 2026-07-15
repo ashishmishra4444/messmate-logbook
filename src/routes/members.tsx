@@ -379,7 +379,7 @@ function MembersPage() {
                   <ChevR className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-2xl" align="end">
+              <PopoverContent className="w-auto p-0 rounded-xl" align="end">
                 <Calendar mode="single" selected={today} onSelect={(d) => d && setToday(d)} />
               </PopoverContent>
             </Popover>
@@ -430,7 +430,7 @@ function MembersPage() {
 
       <div className="grid flex-1 min-h-0 grid-cols-1 gap-5 p-4 sm:p-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* ── LEFT: Member List ────────────────────── */}
-        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+        <section className="flex min-h-0 flex-col rounded-xl border border-border bg-card shadow-card overflow-hidden">
           {/* Search + Actions */}
           <div className="flex items-center gap-2 p-3 border-b border-border bg-card">
             <div className="relative flex-1">
@@ -519,7 +519,7 @@ function MembersPage() {
         </section>
 
         {/* ── RIGHT: Notebook ──────────────────────── */}
-        <section className="flex min-h-0 flex-col rounded-2xl border border-border bg-card shadow-card-md overflow-hidden relative">
+        <section className="flex min-h-0 flex-col rounded-xl border border-border bg-card shadow-card-md overflow-hidden relative">
           {selected ? (
             <>
               {/* Member info header */}
@@ -615,10 +615,10 @@ function MembersPage() {
                 <ScrollArea className="h-full">
                   <div className="notebook-paper min-w-[600px] pl-10 pr-4 pb-6">
                     {/* Sticky header row */}
-                    <div className="sticky top-0 z-10 grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] border-b border-[var(--color-notebook-line)] bg-[var(--color-notebook)]/95 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 backdrop-blur">
+                    <div className="sticky top-0 z-10 grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] h-10 items-center border-b border-[var(--color-notebook-line)] bg-[var(--color-notebook)]/90 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 backdrop-blur-md shadow-sm">
                       <div>Date</div>
                       <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-500"><Utensils className="h-3 w-3" />Breakfast</div>
-                      <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-500"><Soup className="h-3 w-3" />Lunch</div>
+                      <div className="flex items-center gap-1.5 text-primary"><Soup className="h-3 w-3" />Lunch</div>
                       <div className="flex items-center gap-1.5 text-violet-600 dark:text-violet-500"><Sandwich className="h-3 w-3" />Dinner</div>
                       <div>Remarks</div>
                     </div>
@@ -633,8 +633,8 @@ function MembersPage() {
                         <div
                           key={row.iso}
                           className={cn(
-                            "grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] items-center border-b border-[var(--color-notebook-line)] py-2 text-sm transition-colors",
-                            isSun && "bg-slate-50/50 dark:bg-muted/30",
+                            "grid grid-cols-[110px_1fr_1fr_1fr_1.2fr] items-center h-10 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5",
+                            isSun && "bg-slate-50/50 dark:bg-muted/10",
                           )}
                         >
                           <div className={cn("text-[12px] font-medium", isSun ? "text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200")}>
@@ -709,7 +709,7 @@ function MembersPage() {
       <AddMemberDialog open={addOpen} onOpenChange={setAddOpen} onCreated={() => qc.invalidateQueries({ queryKey: ["members"] })} />
       <MonthlySummaryDialog open={summaryOpen} onOpenChange={setSummaryOpen} member={selected} rows={monthRows} stats={stats} />
       <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md rounded-xl">
           <DialogHeader>
             <DialogTitle>Delete Member{selectedIds.length > 1 ? "s" : ""}</DialogTitle>
           </DialogHeader>
@@ -817,7 +817,7 @@ function AddMemberDialog({ open, onOpenChange, onCreated }: {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-[600px] rounded-2xl">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[600px] rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Add New Member</DialogTitle>
         </DialogHeader>
@@ -919,7 +919,7 @@ function MonthlySummaryDialog({ open, onOpenChange, member, rows, stats }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-2xl">
+      <DialogContent className="max-w-lg rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-base font-bold">{member.name} — Monthly Summary</DialogTitle>
         </DialogHeader>

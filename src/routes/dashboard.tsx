@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useGuestMeals } from "@/lib/api-guests";
 import type { Database } from "@/integrations/supabase/types";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -12,7 +13,9 @@ import {
   Coffee,
   Activity,
   AlertTriangle,
-  ArrowUpRight,
+  Banknote,
+  Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { formatDateISO } from "@/lib/format";
 import {
@@ -110,6 +113,19 @@ function Dashboard() {
     return acc + (isBreakfastAbsent ? 1 : 0) + (isLunchAbsent ? 1 : 0) + (isDinnerAbsent ? 1 : 0);
   }, 0);
 
+  // Guest Stats
+  const { data: allGuests = [] } = useGuestMeals();
+  
+  const todayGuestsCount = allGuests.filter(g => g.date === today).length;
+  
+  const currentMonthPrefix = today.substring(0, 7); // e.g. "2026-07"
+  const monthlyGuests = allGuests.filter(g => g.date.startsWith(currentMonthPrefix));
+  const monthlyGuestsCount = monthlyGuests.length;
+  
+  const guestRevenue = allGuests.reduce((acc, g) => acc + Number(g.total_amount), 0);
+  const outstandingGuestPayments = allGuests.filter(g => g.payment_status === 'unpaid').reduce((acc, g) => acc + Number(g.total_amount), 0);
+
+
   const overviewData = [
     { name: "Breakfast", value: breakfastToday, fill: "#F59E0B" },
     { name: "Lunch",     value: lunchToday,     fill: "#5B5CEB" },
@@ -199,26 +215,57 @@ function Dashboard() {
       </div>
 
       {/* ── KPI Tiles ────────────────────────────────── */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {tiles.map((t) => (
-          <div
-            key={t.label}
-            className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-card card-hover cursor-default"
-          >
+        {/* Members & Attendance KPIs */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {tiles.map((t) => (
             <div
-              className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${t.bg}`}
+              key={t.label}
+              className="group flex items-center gap-4 rounded-xl border border-border bg-card p-5 shadow-card card-hover cursor-default"
             >
-              <t.icon className={`h-5 w-5 ${t.color}`} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-3xl font-bold leading-none">{t.value}</div>
-              <div className="mt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground truncate">
-                {t.label}
+              <div
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${t.bg}`}
+              >
+                <t.icon className={`h-5 w-5 ${t.color}`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-2 text-[11px] leading-tight font-semibold uppercase tracking-wide text-muted-foreground">{t.label}</div>
+                <div className="mt-1 text-2xl font-bold leading-none tracking-tight">{t.value}</div>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* Guest Stats KPIs */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card flex items-center justify-between">
+            <div>
+              <div className="text-[12px] font-semibold uppercase text-muted-foreground">Today's Guests</div>
+              <div className="mt-1 text-2xl font-bold">{todayGuestsCount}</div>
+            </div>
+            <Users className="h-8 w-8 text-indigo-500/20" />
           </div>
-        ))}
-      </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card flex items-center justify-between">
+            <div>
+              <div className="text-[12px] font-semibold uppercase text-muted-foreground">Monthly Guests</div>
+              <div className="mt-1 text-2xl font-bold">{monthlyGuestsCount}</div>
+            </div>
+            <Calendar className="h-8 w-8 text-blue-500/20" />
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card flex items-center justify-between">
+            <div>
+              <div className="text-[12px] font-semibold uppercase text-muted-foreground">Guest Revenue</div>
+              <div className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">₹{guestRevenue.toFixed(2)}</div>
+            </div>
+            <Banknote className="h-8 w-8 text-emerald-500/20" />
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5 shadow-card flex items-center justify-between">
+            <div>
+              <div className="text-[12px] font-semibold uppercase text-muted-foreground">Outstanding</div>
+              <div className="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">₹{outstandingGuestPayments.toFixed(2)}</div>
+            </div>
+            <AlertCircle className="h-8 w-8 text-red-500/20" />
+          </div>
+        </div>
 
       {/* ── Charts Row ───────────────────────────────── */}
       <div className="grid gap-5 xl:grid-cols-2">
@@ -333,7 +380,7 @@ function Dashboard() {
             value={attendancePercentage === null ? "—" : `${attendancePercentage}%`}
           />
           <QuickStat label="Low Stock Items" value={lowStockItems.length} />
-          <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-sm">
+          <div className="rounded-xl border border-border bg-card/80 p-4 shadow-sm">
             <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-3">
               Meal Plan Split
             </div>
@@ -360,7 +407,7 @@ function Panel({
   title: string; icon: LucideIcon; className?: string; children: React.ReactNode;
 }) {
   return (
-    <section className={`rounded-2xl border border-border bg-card p-6 shadow-card ${className ?? ""}`}>
+    <section className={`rounded-xl border border-border bg-card p-6 shadow-card ${className ?? ""}`}>
       <div className="mb-5 flex items-center gap-3">
         <div className="grid h-8 w-8 place-items-center rounded-xl bg-primary/10">
           <Icon className="h-4 w-4 text-primary" />
@@ -374,7 +421,7 @@ function Panel({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex min-h-44 items-center justify-center rounded-2xl border border-border border-dashed px-4 text-center bg-muted/30">
+    <div className="flex min-h-44 items-center justify-center rounded-xl border border-border border-dashed px-4 text-center bg-muted/30">
       <p className="text-[13px] text-muted-foreground">{message}</p>
     </div>
   );
@@ -382,7 +429,7 @@ function EmptyState({ message }: { message: string }) {
 
 function QuickStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/50 p-5">
+    <div className="rounded-xl border border-border bg-muted/50 p-5">
       <div className="text-2xl font-bold leading-tight">{value}</div>
       <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>

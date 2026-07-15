@@ -11,15 +11,25 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ProcurementVendorsRouteImport } from './routes/procurement-vendors'
+import { Route as ProcurementPosRouteImport } from './routes/procurement-pos'
+import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as MembersRouteImport } from './routes/members'
 import { Route as MealSummaryRouteImport } from './routes/meal-summary'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as GuestMealsRouteImport } from './routes/guest-meals'
 import { Route as ExpenseRouteImport } from './routes/expense'
+import { Route as DevToolsRouteImport } from './routes/dev-tools'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BillingRouteImport } from './routes/billing'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AttendanceRouteImport } from './routes/attendance'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProcurementVendorsIndexRouteImport } from './routes/procurement-vendors.index'
+import { Route as ProcurementPosIndexRouteImport } from './routes/procurement-pos.index'
+import { Route as ProcurementVendorsVendorIdRouteImport } from './routes/procurement-vendors.$vendorId'
+import { Route as ProcurementPosPoIdRouteImport } from './routes/procurement-pos.$poId'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -29,6 +39,21 @@ const SettingsRoute = SettingsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcurementVendorsRoute = ProcurementVendorsRouteImport.update({
+  id: '/procurement-vendors',
+  path: '/procurement-vendors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcurementPosRoute = ProcurementPosRouteImport.update({
+  id: '/procurement-pos',
+  path: '/procurement-pos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcurementRoute = ProcurementRouteImport.update({
+  id: '/procurement',
+  path: '/procurement',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembersRoute = MembersRouteImport.update({
@@ -51,14 +76,29 @@ const InventoryRoute = InventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuestMealsRoute = GuestMealsRouteImport.update({
+  id: '/guest-meals',
+  path: '/guest-meals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExpenseRoute = ExpenseRouteImport.update({
   id: '/expense',
   path: '/expense',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevToolsRoute = DevToolsRouteImport.update({
+  id: '/dev-tools',
+  path: '/dev-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillingRoute = BillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BackupRoute = BackupRouteImport.update({
@@ -76,46 +116,95 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProcurementVendorsIndexRoute = ProcurementVendorsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProcurementVendorsRoute,
+} as any)
+const ProcurementPosIndexRoute = ProcurementPosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProcurementPosRoute,
+} as any)
+const ProcurementVendorsVendorIdRoute =
+  ProcurementVendorsVendorIdRouteImport.update({
+    id: '/$vendorId',
+    path: '/$vendorId',
+    getParentRoute: () => ProcurementVendorsRoute,
+  } as any)
+const ProcurementPosPoIdRoute = ProcurementPosPoIdRouteImport.update({
+  id: '/$poId',
+  path: '/$poId',
+  getParentRoute: () => ProcurementPosRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
+  '/billing': typeof BillingRoute
   '/dashboard': typeof DashboardRoute
+  '/dev-tools': typeof DevToolsRoute
   '/expense': typeof ExpenseRoute
+  '/guest-meals': typeof GuestMealsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
   '/members': typeof MembersRoute
+  '/procurement': typeof ProcurementRoute
+  '/procurement-pos': typeof ProcurementPosRouteWithChildren
+  '/procurement-vendors': typeof ProcurementVendorsRouteWithChildren
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
+  '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
+  '/procurement-pos/': typeof ProcurementPosIndexRoute
+  '/procurement-vendors/': typeof ProcurementVendorsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
+  '/billing': typeof BillingRoute
   '/dashboard': typeof DashboardRoute
+  '/dev-tools': typeof DevToolsRoute
   '/expense': typeof ExpenseRoute
+  '/guest-meals': typeof GuestMealsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
   '/members': typeof MembersRoute
+  '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
+  '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
+  '/procurement-pos': typeof ProcurementPosIndexRoute
+  '/procurement-vendors': typeof ProcurementVendorsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/attendance': typeof AttendanceRoute
   '/backup': typeof BackupRoute
+  '/billing': typeof BillingRoute
   '/dashboard': typeof DashboardRoute
+  '/dev-tools': typeof DevToolsRoute
   '/expense': typeof ExpenseRoute
+  '/guest-meals': typeof GuestMealsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
   '/members': typeof MembersRoute
+  '/procurement': typeof ProcurementRoute
+  '/procurement-pos': typeof ProcurementPosRouteWithChildren
+  '/procurement-vendors': typeof ProcurementVendorsRouteWithChildren
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
+  '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
+  '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
+  '/procurement-pos/': typeof ProcurementPosIndexRoute
+  '/procurement-vendors/': typeof ProcurementVendorsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,52 +212,86 @@ export interface FileRouteTypes {
     | '/'
     | '/attendance'
     | '/backup'
+    | '/billing'
     | '/dashboard'
+    | '/dev-tools'
     | '/expense'
+    | '/guest-meals'
     | '/inventory'
     | '/login'
     | '/meal-summary'
     | '/members'
+    | '/procurement'
+    | '/procurement-pos'
+    | '/procurement-vendors'
     | '/reports'
     | '/settings'
+    | '/procurement-pos/$poId'
+    | '/procurement-vendors/$vendorId'
+    | '/procurement-pos/'
+    | '/procurement-vendors/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/attendance'
     | '/backup'
+    | '/billing'
     | '/dashboard'
+    | '/dev-tools'
     | '/expense'
+    | '/guest-meals'
     | '/inventory'
     | '/login'
     | '/meal-summary'
     | '/members'
+    | '/procurement'
     | '/reports'
     | '/settings'
+    | '/procurement-pos/$poId'
+    | '/procurement-vendors/$vendorId'
+    | '/procurement-pos'
+    | '/procurement-vendors'
   id:
     | '__root__'
     | '/'
     | '/attendance'
     | '/backup'
+    | '/billing'
     | '/dashboard'
+    | '/dev-tools'
     | '/expense'
+    | '/guest-meals'
     | '/inventory'
     | '/login'
     | '/meal-summary'
     | '/members'
+    | '/procurement'
+    | '/procurement-pos'
+    | '/procurement-vendors'
     | '/reports'
     | '/settings'
+    | '/procurement-pos/$poId'
+    | '/procurement-vendors/$vendorId'
+    | '/procurement-pos/'
+    | '/procurement-vendors/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AttendanceRoute: typeof AttendanceRoute
   BackupRoute: typeof BackupRoute
+  BillingRoute: typeof BillingRoute
   DashboardRoute: typeof DashboardRoute
+  DevToolsRoute: typeof DevToolsRoute
   ExpenseRoute: typeof ExpenseRoute
+  GuestMealsRoute: typeof GuestMealsRoute
   InventoryRoute: typeof InventoryRoute
   LoginRoute: typeof LoginRoute
   MealSummaryRoute: typeof MealSummaryRoute
   MembersRoute: typeof MembersRoute
+  ProcurementRoute: typeof ProcurementRoute
+  ProcurementPosRoute: typeof ProcurementPosRouteWithChildren
+  ProcurementVendorsRoute: typeof ProcurementVendorsRouteWithChildren
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
 }
@@ -187,6 +310,27 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/procurement-vendors': {
+      id: '/procurement-vendors'
+      path: '/procurement-vendors'
+      fullPath: '/procurement-vendors'
+      preLoaderRoute: typeof ProcurementVendorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/procurement-pos': {
+      id: '/procurement-pos'
+      path: '/procurement-pos'
+      fullPath: '/procurement-pos'
+      preLoaderRoute: typeof ProcurementPosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/procurement': {
+      id: '/procurement'
+      path: '/procurement'
+      fullPath: '/procurement'
+      preLoaderRoute: typeof ProcurementRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/members': {
@@ -217,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guest-meals': {
+      id: '/guest-meals'
+      path: '/guest-meals'
+      fullPath: '/guest-meals'
+      preLoaderRoute: typeof GuestMealsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/expense': {
       id: '/expense'
       path: '/expense'
@@ -224,11 +375,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpenseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev-tools': {
+      id: '/dev-tools'
+      path: '/dev-tools'
+      fullPath: '/dev-tools'
+      preLoaderRoute: typeof DevToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/billing': {
+      id: '/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/backup': {
@@ -252,19 +417,80 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/procurement-vendors/': {
+      id: '/procurement-vendors/'
+      path: '/'
+      fullPath: '/procurement-vendors/'
+      preLoaderRoute: typeof ProcurementVendorsIndexRouteImport
+      parentRoute: typeof ProcurementVendorsRoute
+    }
+    '/procurement-pos/': {
+      id: '/procurement-pos/'
+      path: '/'
+      fullPath: '/procurement-pos/'
+      preLoaderRoute: typeof ProcurementPosIndexRouteImport
+      parentRoute: typeof ProcurementPosRoute
+    }
+    '/procurement-vendors/$vendorId': {
+      id: '/procurement-vendors/$vendorId'
+      path: '/$vendorId'
+      fullPath: '/procurement-vendors/$vendorId'
+      preLoaderRoute: typeof ProcurementVendorsVendorIdRouteImport
+      parentRoute: typeof ProcurementVendorsRoute
+    }
+    '/procurement-pos/$poId': {
+      id: '/procurement-pos/$poId'
+      path: '/$poId'
+      fullPath: '/procurement-pos/$poId'
+      preLoaderRoute: typeof ProcurementPosPoIdRouteImport
+      parentRoute: typeof ProcurementPosRoute
+    }
   }
 }
+
+interface ProcurementPosRouteChildren {
+  ProcurementPosPoIdRoute: typeof ProcurementPosPoIdRoute
+  ProcurementPosIndexRoute: typeof ProcurementPosIndexRoute
+}
+
+const ProcurementPosRouteChildren: ProcurementPosRouteChildren = {
+  ProcurementPosPoIdRoute: ProcurementPosPoIdRoute,
+  ProcurementPosIndexRoute: ProcurementPosIndexRoute,
+}
+
+const ProcurementPosRouteWithChildren = ProcurementPosRoute._addFileChildren(
+  ProcurementPosRouteChildren,
+)
+
+interface ProcurementVendorsRouteChildren {
+  ProcurementVendorsVendorIdRoute: typeof ProcurementVendorsVendorIdRoute
+  ProcurementVendorsIndexRoute: typeof ProcurementVendorsIndexRoute
+}
+
+const ProcurementVendorsRouteChildren: ProcurementVendorsRouteChildren = {
+  ProcurementVendorsVendorIdRoute: ProcurementVendorsVendorIdRoute,
+  ProcurementVendorsIndexRoute: ProcurementVendorsIndexRoute,
+}
+
+const ProcurementVendorsRouteWithChildren =
+  ProcurementVendorsRoute._addFileChildren(ProcurementVendorsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AttendanceRoute: AttendanceRoute,
   BackupRoute: BackupRoute,
+  BillingRoute: BillingRoute,
   DashboardRoute: DashboardRoute,
+  DevToolsRoute: DevToolsRoute,
   ExpenseRoute: ExpenseRoute,
+  GuestMealsRoute: GuestMealsRoute,
   InventoryRoute: InventoryRoute,
   LoginRoute: LoginRoute,
   MealSummaryRoute: MealSummaryRoute,
   MembersRoute: MembersRoute,
+  ProcurementRoute: ProcurementRoute,
+  ProcurementPosRoute: ProcurementPosRouteWithChildren,
+  ProcurementVendorsRoute: ProcurementVendorsRouteWithChildren,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
 }

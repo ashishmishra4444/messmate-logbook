@@ -16,6 +16,9 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CommandPalette } from "@/components/CommandPalette";
+import { NotificationsMenu } from "@/components/NotificationsMenu";
+import { Search } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -170,14 +173,32 @@ function RootComponent() {
         <div className="flex min-h-screen w-full bg-background">
           <AppSidebar />
           <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex h-12 items-center border-b border-border bg-card/50 px-3 md:hidden">
-              <SidebarTrigger />
-            </div>
-            <main className="flex-1 min-w-0">
+            <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4 sticky top-0 z-10">
+              <SidebarTrigger className="md:hidden" />
+              
+              <div className="flex-1 flex items-center justify-between">
+                <button
+                  className="inline-flex items-center gap-2 rounded-md border border-input bg-muted/50 px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-full max-w-sm md:w-64"
+                  onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Search...</span>
+                  <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex ml-auto">
+                    <span className="text-xs">⌘</span>K
+                  </kbd>
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  <NotificationsMenu />
+                </div>
+              </div>
+            </header>
+            <main className="flex-1 min-w-0 overflow-auto p-4 md:p-6 bg-muted/10">
               <Outlet />
             </main>
           </div>
         </div>
+        <CommandPalette />
         <Toaster richColors position="top-right" />
       </SidebarProvider>
     </QueryClientProvider>

@@ -142,7 +142,7 @@ function AttendancePage() {
                   {date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-2xl border-border bg-card" align="end">
+              <PopoverContent className="w-auto p-0 rounded-xl border-border bg-card" align="end">
                 <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
               </PopoverContent>
             </Popover>
@@ -174,7 +174,7 @@ function AttendancePage() {
 
       {/* ── Table ───────────────────────────────────── */}
       <div className="flex-1 p-6">
-        <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
           {/* Search bar */}
           <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
             <div className="relative flex-1 min-w-[220px]">

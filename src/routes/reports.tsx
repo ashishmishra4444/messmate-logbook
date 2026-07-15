@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, ChefHat, Users, BarChart3 } from "lucide-react";
 import { downloadCSV, formatDateISO } from "@/lib/format";
 import { useMemo } from "react";
+import { ExportDropdown } from "@/components/ExportDropdown";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Reports — MessMate" }] }),
@@ -265,7 +266,7 @@ function ReportsPage() {
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
-    <div className={`rounded-2xl border border-border p-4 shadow-card bg-card ${tone}`}>
+    <div className={`rounded-xl border border-border p-4 shadow-card bg-card ${tone}`}>
       <div className="text-2xl font-bold text-foreground leading-tight">{value}</div>
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
     </div>
@@ -274,13 +275,11 @@ function Stat({ label, value, tone }: { label: string; value: number; tone: stri
 
 function SectionCard({ title, onExport, children }: { title: string; onExport?: () => void; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+    <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card/80 backdrop-blur-sm px-4 py-3">
         <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
         {onExport && (
-          <Button size="sm" variant="outline" className="h-8 gap-2 rounded-lg bg-background border-input hover:bg-accent text-foreground text-[12px]" onClick={onExport}>
-            <FileDown className="h-3.5 w-3.5" /> Export CSV
-          </Button>
+          <ExportDropdown onExportCSV={onExport} />
         )}
       </div>
       {children}

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CreatePOModal } from "@/components/CreatePOModal";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({ meta: [{ title: "Inventory — MessMate" }] }),
@@ -57,6 +58,12 @@ type Item = {
   missing_qty: number;
   min_qty: number;
   unit_price: number;
+  primary_vendor_id?: string | null;
+  secondary_vendor_id?: string | null;
+  last_purchase_vendor_id?: string | null;
+  lead_time_days?: number | null;
+  safety_stock?: number | null;
+  avg_daily_consumption?: number | null;
 };
 
 type Movement = {
@@ -78,6 +85,7 @@ function InventoryPage() {
   const [search, setSearch] = useState("");
   const [itemDialog, setItemDialog] = useState<{ open: boolean; item: Item | null }>({ open: false, item: null });
   const [moveDialog, setMoveDialog] = useState<{ open: boolean; type: MovementType; item: Item | null }>({ open: false, type: "stock_in", item: null });
+  const [poModal, setPoModal] = useState<{ open: boolean; item: Item | null }>({ open: false, item: null });
 
   const { data: items = [] } = useQuery<Item[]>({
     queryKey: ["inventory_items"],
@@ -163,7 +171,7 @@ function InventoryPage() {
 
       <div className="grid flex-1 gap-5 p-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         {/* MAIN */}
-        <section className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+        <section className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4 bg-card">
             <Tabs value={tab} onValueChange={(v) => setTab(v as Category)}>
               <TabsList className="bg-secondary rounded-xl h-9">
@@ -243,7 +251,7 @@ function InventoryPage() {
 
         {/* SIDE */}
         <aside className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-card">
             <div className="flex items-center gap-2 mb-3">
               <div className="grid h-6 w-6 place-items-center rounded-md bg-amber-500/10">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
@@ -252,12 +260,17 @@ function InventoryPage() {
             </div>
             <ul className="space-y-1.5">
               {lowStockAlerts.map((i) => (
-                <li key={i.id} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 p-2.5">
-                  <div className="min-w-0">
-                    <div className="truncate text-[13px] font-medium text-foreground">{i.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{i.available_qty} {i.unit} left</div>
+                <li key={i.id} className="flex flex-col gap-2 rounded-xl border border-border bg-muted/30 p-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-medium text-foreground">{i.name}</div>
+                      <div className="text-[11px] text-muted-foreground">{i.available_qty} {i.unit} left</div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-500">Min: {i.min_qty}</span>
                   </div>
-                  <span className="shrink-0 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-500">Min: {i.min_qty}</span>
+                  <Button variant="outline" size="sm" className="h-7 text-[11px] w-full" onClick={() => setPoModal({ open: true, item: i })}>
+                    1-Click PO
+                  </Button>
                 </li>
               ))}
               {lowStockAlerts.length === 0 && (
@@ -266,7 +279,7 @@ function InventoryPage() {
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-card">
             <h3 className="text-[13px] font-semibold text-foreground mb-3">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-2">
               <QuickAction icon={ArrowDownToLine} label="Stock In" desc="Add new stock" tone="bg-emerald-500/10 text-emerald-500 border-emerald-500/20" onClick={() => setMoveDialog({ open: true, type: "stock_in", item: items[0] ?? null })} />
@@ -315,6 +328,11 @@ function InventoryPage() {
           qc.invalidateQueries({ queryKey: ["inventory_movements"] });
         }}
       />
+      <CreatePOModal 
+        open={poModal.open} 
+        onOpenChange={(open) => setPoModal({ open, item: poModal.item })}
+        item={poModal.item}
+      />
     </div>
   );
 }
@@ -329,7 +347,7 @@ function KpiCard({ icon: Icon, label, value, sub, tone }: { icon: React.Componen
   } as const;
   const t = map[tone];
   return (
-    <div className="group flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-card card-hover cursor-default">
+    <div className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-card card-hover cursor-default">
       <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-xl border transition-transform duration-200 group-hover:scale-105", t.bg, t.border)}>
         <Icon className={cn("h-5 w-5", t.icon)} />
       </div>
@@ -356,7 +374,7 @@ function QuickAction({ icon: Icon, label, desc, tone, onClick }: { icon: React.C
 
 function RecentList<T>({ title, icon: Icon, tone, rows, columns, render }: { title: string; icon: React.ComponentType<{ className?: string }>; tone: string; rows: T[]; columns: string[]; render: (row: T) => (string | number)[] }) {
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-card overflow-hidden">
+    <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
       <div className="flex items-center gap-2 border-b border-border p-4 bg-card">
         <Icon className={cn("h-4 w-4", tone)} />
         <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>

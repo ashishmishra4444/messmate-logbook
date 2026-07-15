@@ -53,7 +53,7 @@ function DashboardSummary() {
         </p>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-sm">
             <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">

@@ -11,6 +11,11 @@ import {
   Boxes,
   LogOut,
   Wallet,
+  Coffee,
+  Package,
+  Receipt,
+  DatabaseBackup,
+  Stethoscope,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -53,11 +59,22 @@ const items = [
   { title: "Members",      url: "/members",      icon: Users },
   { title: "Attendance",   url: "/attendance",   icon: ClipboardCheck },
   { title: "Expense",      url: "/expense",      icon: Wallet },
+  { title: "Billing & Invoices", url: "/billing", icon: Receipt },
+  { title: "Guest Meals",  url: "/guest-meals",  icon: Coffee },
   { title: "Inventory",    url: "/inventory",    icon: Boxes },
+  { title: "Procurement",  url: "/procurement",  icon: Package },
   { title: "Reports",      url: "/reports",      icon: FileBarChart },
   { title: "Meal Summary", url: "/meal-summary", icon: Utensils },
   { title: "Settings",     url: "/settings",     icon: Settings },
-  { title: "Backup & Export", url: "/backup",    icon: Database },
+  { title: "Backup & Export", url: "/backup",    icon: DatabaseBackup },
+];
+
+const systemItems = [
+  {
+    title: "System Health",
+    url: "/dev-tools",
+    icon: Stethoscope,
+  },
 ];
 
 export function AppSidebar() {
@@ -104,12 +121,12 @@ export function AppSidebar() {
       {/* ── Brand Header ─────────────────────────────── */}
       <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-900/30">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/20">
             <ChefHat className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <div className="text-sm font-bold tracking-tight text-white">MessMate</div>
-            <div className="text-[11px] text-sidebar-foreground/50 truncate">
+            <div className="text-sm font-semibold tracking-tight text-foreground">MessMate</div>
+            <div className="text-[11px] text-muted-foreground truncate">
               {profile?.mess_name || "Mess Manager"}
             </div>
           </div>
@@ -120,7 +137,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu className="gap-1">
               {items.map((item) => {
                 const active = isActive(item.url);
                 return (
@@ -130,22 +147,52 @@ export function AppSidebar() {
                       isActive={active}
                       tooltip={item.title}
                       className={[
-                        "group relative h-9 rounded-lg text-[13px] font-medium transition-all duration-200 overflow-hidden",
+                        "group relative h-9 rounded-md text-[13px] transition-all duration-200",
                         active
-                          ? "bg-gradient-to-r from-[#5B5CEB] to-[#6F72FF] text-white shadow-md shadow-[#5B5CEB]/25"
-                          : "text-[#A9B4C8] bg-transparent hover:bg-[#5B5CEB]/10 hover:text-white",
+                          ? "nav-item-active"
+                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       ].join(" ")}
                     >
                       <Link to={item.url} onClick={() => setOpenMobile(false)} className="flex items-center gap-2 relative z-10 w-full h-full px-2">
-                        {active && (
-                          <div className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-sm bg-white/60 shadow-[1px_0_4px_rgba(255,255,255,0.3)]"></div>
-                        )}
-                        <div className={`grid place-items-center w-6 h-6 transition-all duration-200 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:rounded-full ${active ? 'group-data-[collapsible=icon]:bg-[#5B5CEB] group-data-[collapsible=icon]:shadow-md' : 'group-hover:group-data-[collapsible=icon]:scale-110'}`}>
+                        <div className={`grid place-items-center w-6 h-6 transition-all duration-200 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:rounded-full ${active ? 'group-data-[collapsible=icon]:bg-primary/10 group-data-[collapsible=icon]:text-primary' : 'group-hover:group-data-[collapsible=icon]:scale-110'}`}>
                           <item.icon
                             style={{ width: 16, height: 16 }}
                             className={[
                               "shrink-0 transition-colors duration-200",
-                              active ? "text-white" : "text-[#8D98AB] group-hover:text-[#5B5CEB]",
+                              active ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
+                            ].join(" ")}
+                          />
+                        </div>
+                        <span className="truncate group-data-[collapsible=icon]:hidden">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+
+              <SidebarGroupLabel className="mt-4 px-2 text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">System</SidebarGroupLabel>
+              {systemItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.title}
+                      className={[
+                        "group relative h-9 rounded-md text-[13px] transition-all duration-200",
+                        active
+                          ? "nav-item-active"
+                          : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ].join(" ")}
+                    >
+                      <Link to={item.url} onClick={() => setOpenMobile(false)} className="flex items-center gap-2 relative z-10 w-full h-full px-2">
+                        <div className={`grid place-items-center w-6 h-6 transition-all duration-200 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:rounded-full ${active ? 'group-data-[collapsible=icon]:bg-primary/10 group-data-[collapsible=icon]:text-primary' : 'group-hover:group-data-[collapsible=icon]:scale-110'}`}>
+                          <item.icon
+                            style={{ width: 16, height: 16 }}
+                            className={[
+                              "shrink-0 transition-colors duration-200",
+                              active ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
                             ].join(" ")}
                           />
                         </div>
@@ -196,17 +243,17 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border px-2 py-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors duration-150 hover:bg-sidebar-accent group-data-[collapsible=icon]:justify-center">
-              <Avatar className="h-7 w-7 shrink-0">
-                <AvatarFallback className="bg-indigo-500/20 text-indigo-300 text-[11px] font-semibold border border-indigo-500/20">
+            <button className="group/profile flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-all duration-200 hover:bg-sidebar-accent hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 group-data-[collapsible=icon]:justify-center">
+              <Avatar className="h-8 w-8 shrink-0 transition-transform duration-200 group-hover/profile:scale-105">
+                <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-semibold border border-primary/20">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <div className="truncate text-[13px] font-medium text-sidebar-foreground">
+                <div className="truncate text-[13px] font-semibold text-sidebar-foreground">
                   {profile?.name || "Admin User"}
                 </div>
-                <div className="truncate text-[11px] text-sidebar-foreground/40">
+                <div className="truncate text-[11px] text-muted-foreground">
                   Mess Administrator
                 </div>
               </div>

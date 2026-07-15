@@ -70,7 +70,7 @@ function BackupPage() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 max-w-2xl">
-        <div className="group rounded-2xl border border-border bg-card p-6 shadow-card card-hover">
+        <div className="group rounded-xl border border-border bg-card p-6 shadow-card card-hover">
           <div className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
             <Database className="h-5 w-5 text-indigo-600 dark:text-indigo-500" />
           </div>
@@ -81,7 +81,7 @@ function BackupPage() {
           </Button>
         </div>
 
-        <div className="group rounded-2xl border border-border bg-card p-6 shadow-card card-hover">
+        <div className="group rounded-xl border border-border bg-card p-6 shadow-card card-hover">
           <div className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
             <Database className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
           </div>

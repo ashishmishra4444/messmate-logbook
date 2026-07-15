@@ -90,7 +90,7 @@ const defaultForm = (): ExpenseForm => ({
   added_by: "Admin User",
 });
 
-export function ExpensePage() {
+function ExpensePage() {
   const queryClient = useQueryClient();
   const [selectedMonth, setSelectedMonth] = useState(() => new Date());
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
@@ -279,7 +279,7 @@ export function ExpensePage() {
         ))}
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <section className="rounded-xl border border-border bg-card p-4 shadow-card">
         <div className="flex flex-wrap items-center gap-2.5">
           <MonthPicker selectedMonth={selectedMonth} onSelect={handleMonthSelect} />
           <Select value={categoryFilter} onValueChange={(value) => { setCategoryFilter(value as CategoryFilter); setPage(1); }}>
@@ -318,7 +318,7 @@ export function ExpensePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+      <section className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-sm">
             <thead className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border">
@@ -386,7 +386,7 @@ export function ExpensePage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-[14px] font-semibold text-foreground">Monthly Summary</h2>
             <span className="text-[12px] text-muted-foreground font-medium">({monthLabel(selectedMonth)})</span>
@@ -429,7 +429,7 @@ export function ExpensePage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card">
           <h2 className="text-[14px] font-semibold text-foreground mb-1">Export Reports</h2>
           <p className="text-[13px] text-muted-foreground">Export filtered expenses in your preferred format.</p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -504,7 +504,7 @@ export function ExpensePage() {
 function SummaryCard({ card }: { card: ReturnType<typeof buildCards>[number] }) {
   const Icon = card.icon;
   return (
-    <div className="group rounded-2xl border border-border bg-card p-5 shadow-card card-hover cursor-default">
+    <div className="group rounded-xl border border-border bg-card p-5 shadow-card card-hover cursor-default">
       <div className="flex items-start justify-between gap-3">
         <div className={cn("grid h-11 w-11 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105", card.iconTone)}>
           <Icon className="h-5 w-5" />
@@ -530,7 +530,7 @@ function MonthPicker({ selectedMonth, onSelect }: { selectedMonth: Date; onSelec
           <CalendarDays className="h-4 w-4 text-muted-foreground" /> {monthLabel(selectedMonth)}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="z-[70] w-auto p-0 rounded-2xl border-border bg-card" align="start">
+      <PopoverContent className="z-[70] w-auto p-0 rounded-xl border-border bg-card" align="start">
         <Calendar mode="single" selected={selectedMonth} onSelect={onSelect} initialFocus />
       </PopoverContent>
     </Popover>

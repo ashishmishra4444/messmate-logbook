@@ -35,6 +35,7 @@ import {
   Sun,
   User,
   Utensils,
+  Wallet,
   TrendingUp,
   Activity,
   Zap,
@@ -48,6 +49,7 @@ import {
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
+import { MealSessionsAdmin } from "@/components/MealSessionsAdmin";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — MessMate" }] }),
@@ -60,10 +62,15 @@ type Prefs = {
   lunchAlerts: boolean;
   dinnerAlerts: boolean;
   lowStock: boolean;
-  weeklyReport: boolean;
   breakfastTime: string;
   lunchTime: string;
   dinnerTime: string;
+  breakfastPrice: string;
+  lunchPrice: string;
+  dinnerPrice: string;
+  lateFee: string;
+  gstPercentage: string;
+  applyGst: boolean;
 };
 
 const defaultProfile: Profile = {
@@ -81,6 +88,12 @@ const defaultPrefs: Prefs = {
   breakfastTime: "08:00 AM",
   lunchTime: "12:00 PM",
   dinnerTime: "08:00 PM",
+  breakfastPrice: "40",
+  lunchPrice: "60",
+  dinnerPrice: "60",
+  lateFee: "10",
+  gstPercentage: "5",
+  applyGst: true,
 };
 const currentPlan = "Pro";
 const subscriptionStartDate = "27 June 2026";
@@ -120,12 +133,12 @@ function SettingsPage() {
         supabase.from("members").select("id, meal_plan", { count: "exact" }),
         supabase.from("expenses").select("amount"),
         supabase.from("attendance").select("id", { count: "exact" }).eq("date", new Date().toISOString().split("T")[0]),
-        supabase.from("inventory_items").select("id, quantity, min_stock", { count: "exact" }),
+        supabase.from("inventory_items").select("id, available_qty, min_qty", { count: "exact" }),
       ]);
 
       const members = membersRes.data ?? [];
       const totalExpenses = (expensesRes.data ?? []).reduce((s: number, e: any) => s + Number(e.amount), 0);
-      const lowStockCount = (inventoryRes.data ?? []).filter((i: any) => Number(i.quantity) <= Number(i.min_stock)).length;
+      const lowStockCount = (inventoryRes.data ?? []).filter((i: any) => Number(i.available_qty) <= Number(i.min_qty)).length;
 
       return {
         totalMembers: membersRes.count ?? members.length,
@@ -156,6 +169,12 @@ function SettingsPage() {
           breakfastTime: dbData.profile.breakfast_time,
           lunchTime: dbData.profile.lunch_time,
           dinnerTime: dbData.profile.dinner_time,
+          breakfastPrice: "40",
+          lunchPrice: "60",
+          dinnerPrice: "60",
+          lateFee: "10",
+          gstPercentage: "5",
+          applyGst: true,
         });
       } else {
         setProfile(prev => ({ ...prev, email: dbData.user.email || "" }));
@@ -271,9 +290,11 @@ function SettingsPage() {
       <Tabs defaultValue="profile" className="min-w-0 w-full">
         <TabsList className="flex h-auto min-h-9 w-full flex-wrap justify-start gap-1 bg-muted rounded-xl p-1">
           <TabsTrigger value="profile" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><User className="h-3.5 w-3.5" />Profile</TabsTrigger>
+          <TabsTrigger value="billing" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Wallet className="h-3.5 w-3.5" />Billing & Pricing</TabsTrigger>
           <TabsTrigger value="security" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Lock className="h-3.5 w-3.5" />Security</TabsTrigger>
           <TabsTrigger value="notifications" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Bell className="h-3.5 w-3.5" />Notifications</TabsTrigger>
           <TabsTrigger value="appearance" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Sun className="h-3.5 w-3.5" />Appearance</TabsTrigger>
+          <TabsTrigger value="meal-sessions" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Utensils className="h-3.5 w-3.5" />Meal Sessions</TabsTrigger>
           <TabsTrigger value="software-information" className="rounded-lg text-[12px] data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2"><Info className="h-3.5 w-3.5" />Software Information</TabsTrigger>
         </TabsList>
 
@@ -298,6 +319,47 @@ function SettingsPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={saveProfile} className="gap-2"><Save className="h-4 w-4" /> Save changes</Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* BILLING TAB */}
+        <TabsContent value="billing" className="mt-6">
+          <div className="grid min-w-0 max-w-2xl gap-5 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-[14px] font-semibold text-foreground">Billing & Pricing Configuration</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Breakfast Price (₹)">
+                <Input type="number" value={prefs.breakfastPrice} onChange={(e) => setPrefs({ ...prefs, breakfastPrice: e.target.value })} />
+              </Field>
+              <Field label="Lunch Price (₹)">
+                <Input type="number" value={prefs.lunchPrice} onChange={(e) => setPrefs({ ...prefs, lunchPrice: e.target.value })} />
+              </Field>
+              <Field label="Dinner Price (₹)">
+                <Input type="number" value={prefs.dinnerPrice} onChange={(e) => setPrefs({ ...prefs, dinnerPrice: e.target.value })} />
+              </Field>
+              <Field label="Late Fee (₹/day)">
+                <Input type="number" value={prefs.lateFee} onChange={(e) => setPrefs({ ...prefs, lateFee: e.target.value })} />
+              </Field>
+            </div>
+            <div className="mt-2 border-t pt-4">
+              <h3 className="text-sm font-semibold mb-3">Tax Settings</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="GST Percentage (%)">
+                  <Input type="number" value={prefs.gstPercentage} onChange={(e) => setPrefs({ ...prefs, gstPercentage: e.target.value })} />
+                </Field>
+                <div className="flex flex-col justify-center pt-2">
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-secondary/20">
+                    <div className="space-y-0.5">
+                      <Label className="text-[12px] font-medium text-foreground">Apply GST</Label>
+                      <p className="text-[11px] text-muted-foreground">Add GST to final invoices</p>
+                    </div>
+                    <Switch checked={prefs.applyGst} onCheckedChange={(v) => setPrefs({ ...prefs, applyGst: v })} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-end gap-2 mt-2">
+              <Button onClick={() => savePrefs(prefs)} className="gap-2"><Save className="h-4 w-4" /> Save configuration</Button>
             </div>
           </div>
         </TabsContent>
@@ -374,6 +436,11 @@ function SettingsPage() {
               <Switch checked={dark} onCheckedChange={toggleTheme} />
             </div>
           </div>
+        </TabsContent>
+
+        {/* MEAL SESSIONS TAB */}
+        <TabsContent value="meal-sessions" className="mt-6">
+          <MealSessionsAdmin />
         </TabsContent>
 
         {/* SOFTWARE INFORMATION TAB */}
