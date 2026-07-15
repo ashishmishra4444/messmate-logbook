@@ -60,7 +60,20 @@ function BackupPage() {
         r.remarks ?? "",
       ]);
     });
-    downloadCSV(`messmate-attendance-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    worksheet["!cols"] = [
+      { wch: 14 }, // Date
+      { wch: 24 }, // Member
+      { wch: 12 }, // Room
+      { wch: 16 }, // Breakfast
+      { wch: 16 }, // Lunch
+      { wch: 16 }, // Dinner
+      { wch: 30 }, // Remarks
+    ];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+    XLSX.writeFile(workbook, `messmate-attendance-${new Date().toISOString().slice(0, 10)}.xlsx`, { compression: true });
   };
   return (
     <div className="page-enter min-h-screen p-6">
