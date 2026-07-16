@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CommandPalette } from "@/components/CommandPalette";
 import { NotificationsMenu } from "@/components/NotificationsMenu";
 import { Search } from "lucide-react";
+import { useRealtimeAttendance } from "@/hooks/useRealtimeAttendance";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +121,9 @@ function RootComponent() {
   const router = useRouter();
   const isLoginPage = location.pathname === "/login";
   const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Globally subscribe to real-time attendance events
+  useRealtimeAttendance(queryClient);
 
   useEffect(() => {
     async function checkAuth() {

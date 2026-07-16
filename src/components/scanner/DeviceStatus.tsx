@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export function DeviceStatus() {
+interface DeviceStatusProps {
+  session: { id: string; meal_type: string; start_time: string; end_time: string; } | null | undefined;
+  isOnline?: boolean;
+}
+
+export function DeviceStatus({ session, isOnline = true }: DeviceStatusProps) {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -10,22 +15,7 @@ export function DeviceStatus() {
     return () => clearInterval(timer);
   }, []);
 
-  const { data: session } = useQuery({
-    queryKey: ['active_meal_session_scanner'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('meal_sessions')
-        .select('meal_type, start_time, end_time')
-        .eq('status', 'Active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (error) return null;
-      return data;
-    },
-    refetchInterval: 60000 // Refetch every minute
-  });
+  // Removed useQuery for active_meal_session_scanner here since it's passed as prop
 
   const { data: operator } = useQuery({
     queryKey: ['current_operator'],
@@ -53,8 +43,10 @@ export function DeviceStatus() {
       
       <div className="flex items-center gap-6 text-right">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-sm font-medium text-zinc-300">Front Desk Scanner</span>
+          <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span className="text-sm font-medium text-zinc-300">
+            Front Desk Scanner {isOnline ? '(Online)' : '(Offline)'}
+          </span>
         </div>
         <div className="w-px h-8 bg-zinc-700" />
         <div className="text-2xl font-bold font-mono tracking-wider w-[120px]">

@@ -11,7 +11,32 @@ import { useValidateIdentity } from "@/lib/api-attendance";
 import { ManualOverrideDialog } from "@/components/ManualOverrideDialog";
 import { Button } from "@/components/ui/button";
 
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { useScannerHeartbeat } from "@/hooks/useScannerHeartbeat";
+
 export function ScannerController() {
+  useScannerHeartbeat('Kitchen Tablet 1');
+  const { data: session } = useQuery({
+    queryKey: ['active_meal_session_scanner'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('meal_sessions')
+        .select('id, meal_type, start_time, end_time')
+        .eq('status', 'Active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) return null;
+      return data;
+    },
+    refetchInterval: 60000
+  });
+
+  const { isOnline, isSyncing, queueSize } = useOfflineSync();
+
   const [state, dispatch] = useReducer(scannerReducer, initialScannerState);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [kpis, setKpis] = useState({ expected: 150, scanned: 0 }); // Mock expected for now
@@ -40,7 +65,9 @@ export function ScannerController() {
       const response = await validateIdentity.mutateAsync({
         auth_type: 'qr',
         payload: text,
-        scanner_name: 'Kitchen Tablet 1'
+        scanner_name: 'Kitchen Tablet 1',
+        meal_session_id: session?.id,
+        meal_type: session?.meal_type
       });
 
       if (response.status === 'approved') {
@@ -108,7 +135,18 @@ export function ScannerController() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-black text-white overflow-hidden">
-      <DeviceStatus />
+      {/* Offline Sync Banner if syncing */}
+      {!isOnline && (
+        <div className="w-full bg-amber-500 text-black font-semibold text-center py-1 text-sm tracking-widest uppercase">
+          OFFLINE MODE - Queuing Scans locally
+        </div>
+      )}
+      {isSyncing && (
+        <div className="w-full bg-blue-500 text-white font-semibold text-center py-1 text-sm tracking-widest uppercase animate-pulse">
+          Syncing {queueSize} offline scans...
+        </div>
+      )}
+      <DeviceStatus session={session} isOnline={isOnline} />
       
       <div className="flex flex-1 h-[calc(100vh-64px)]">
         {/* Left Pane - 60% */}
@@ -127,7 +165,7 @@ export function ScannerController() {
 
         {/* Right Pane - 40% */}
         <div className="w-[40%] flex flex-col p-6 gap-6 bg-zinc-950 border-l border-zinc-900">
-          <ScannerKPIs expected={kpis.expected} scanned={kpis.scanned} />
+          <ScannerKPIs expected={kpis.expected} scanned={kpis.scanned} offlineQueueSize={queueSize} />
           
           <div className="flex-none">
             <ScannerStatusBanner state={state} />
@@ -152,7 +190,7 @@ export function ScannerController() {
         onOpenChange={(open) => {
           if (!open) dispatch({ type: 'CLOSE_MANUAL_OVERRIDE' });
         }}
-        activeSessionId="todo_fetch_active_session_id" // Ideally passed down from DeviceStatus context or fetched
+        activeSessionId={session?.id || ""}
       />
     </div>
   );

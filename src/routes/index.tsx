@@ -20,8 +20,10 @@ export const Route = createFileRoute("/")({
 const DEFAULT_WIDGETS = [
   { id: "kpis", title: "Key Metrics", visible: true },
   { id: "activity", title: "Activity Center", visible: true },
-  { id: "pending_tasks", title: "Pending Tasks", visible: true },
+  { id: "scanner_health", title: "Scanner Health", visible: true },
 ];
+
+import { LiveScannerHealth } from "@/components/LiveScannerHealth";
 
 function Dashboard() {
   const [widgets, setWidgets] = React.useState(DEFAULT_WIDGETS);
@@ -135,31 +137,8 @@ function Dashboard() {
           </Card>
         )}
         
-        {isVisible("pending_tasks") && (
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle>Pending Tasks</CardTitle>
-              <CardDescription>Actionable items requiring your attention.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center p-3 rounded-lg border bg-card">
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">Approve PO-771357</p>
-                    <p className="text-xs text-muted-foreground">Fresh Farms Dairy - ₹1,250</p>
-                  </div>
-                  <Button variant="outline" size="sm">Review</Button>
-                </div>
-                <div className="flex items-center p-3 rounded-lg border bg-card">
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">Low Stock: Rice (Basmati)</p>
-                    <p className="text-xs text-muted-foreground">Available: 15 Kg | Min: 50 Kg</p>
-                  </div>
-                  <Button variant="outline" size="sm">Reorder</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {isVisible("scanner_health") && (
+          <LiveScannerHealth />
         )}
       </div>
     </div>

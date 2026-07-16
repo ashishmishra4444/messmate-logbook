@@ -1,9 +1,10 @@
 interface ScannerKPIsProps {
   expected: number;
   scanned: number;
+  offlineQueueSize?: number;
 }
 
-export function ScannerKPIs({ expected, scanned }: ScannerKPIsProps) {
+export function ScannerKPIs({ expected, scanned, offlineQueueSize = 0 }: ScannerKPIsProps) {
   const remaining = Math.max(0, expected - scanned);
   const progress = expected > 0 ? Math.min(100, (scanned / expected) * 100) : 0;
 
@@ -22,6 +23,13 @@ export function ScannerKPIs({ expected, scanned }: ScannerKPIsProps) {
         <span className="text-2xl font-bold text-amber-400">{remaining}</span>
       </div>
       
+      {offlineQueueSize > 0 && (
+        <div className="col-span-3 bg-amber-500/20 p-2 rounded-lg flex items-center justify-between border border-amber-500/50 mt-2">
+           <span className="text-amber-500 font-semibold text-sm">Offline Queue</span>
+           <span className="text-amber-500 font-bold text-lg">{offlineQueueSize} Pending</span>
+        </div>
+      )}
+
       <div className="col-span-3 mt-2">
         <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
           <div 
