@@ -860,7 +860,7 @@ function AddMemberDialog({ open, onOpenChange, onCreated }: {
                   <SelectItem value="dinner">Dinner only</SelectItem>
                   <SelectItem value="breakfast_lunch">Breakfast + Lunch</SelectItem>
                   <SelectItem value="breakfast_dinner">Breakfast + Dinner</SelectItem>
-                  <SelectItem value="lunch_dinner">Lunch + Dinner</SelectItem>
+                  <SelectItem value="both">Lunch + Dinner</SelectItem>
                   <SelectItem value="all">All Meals</SelectItem>
                 </SelectContent>
               </Select>

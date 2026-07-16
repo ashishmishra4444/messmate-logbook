@@ -17,7 +17,9 @@ export function DeviceStatus() {
         .from('meal_sessions')
         .select('meal_type, start_time, end_time')
         .eq('status', 'Active')
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       
       if (error) return null;
       return data;
