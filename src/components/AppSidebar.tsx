@@ -16,6 +16,8 @@ import {
   Receipt,
   DatabaseBackup,
   Stethoscope,
+  IdCard,
+  ScanLine,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +63,8 @@ const items = [
   { title: "Expense",      url: "/expense",      icon: Wallet },
   { title: "Billing & Invoices", url: "/billing", icon: Receipt },
   { title: "Guest Meals",  url: "/guest-meals",  icon: Coffee },
+  { title: "Member Pass",  url: "/member-pass",  icon: IdCard },
+  { title: "Scanner UI",   url: "/scanner",      icon: ScanLine },
   { title: "Inventory",    url: "/inventory",    icon: Boxes },
   { title: "Procurement",  url: "/procurement",  icon: Package },
   { title: "Reports",      url: "/reports",      icon: FileBarChart },

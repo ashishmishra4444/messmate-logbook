@@ -10,11 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ScannerRouteImport } from './routes/scanner'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ProcurementVendorsRouteImport } from './routes/procurement-vendors'
 import { Route as ProcurementPosRouteImport } from './routes/procurement-pos'
 import { Route as ProcurementRouteImport } from './routes/procurement'
 import { Route as MembersRouteImport } from './routes/members'
+import { Route as MemberPassRouteImport } from './routes/member-pass'
 import { Route as MealSummaryRouteImport } from './routes/meal-summary'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InventoryRouteImport } from './routes/inventory'
@@ -34,6 +36,11 @@ import { Route as ProcurementPosPoIdRouteImport } from './routes/procurement-pos
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScannerRoute = ScannerRouteImport.update({
+  id: '/scanner',
+  path: '/scanner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -59,6 +66,11 @@ const ProcurementRoute = ProcurementRouteImport.update({
 const MembersRoute = MembersRouteImport.update({
   id: '/members',
   path: '/members',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberPassRoute = MemberPassRouteImport.update({
+  id: '/member-pass',
+  path: '/member-pass',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MealSummaryRoute = MealSummaryRouteImport.update({
@@ -150,11 +162,13 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
+  '/member-pass': typeof MemberPassRoute
   '/members': typeof MembersRoute
   '/procurement': typeof ProcurementRoute
   '/procurement-pos': typeof ProcurementPosRouteWithChildren
   '/procurement-vendors': typeof ProcurementVendorsRouteWithChildren
   '/reports': typeof ReportsRoute
+  '/scanner': typeof ScannerRoute
   '/settings': typeof SettingsRoute
   '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
   '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
@@ -173,9 +187,11 @@ export interface FileRoutesByTo {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
+  '/member-pass': typeof MemberPassRoute
   '/members': typeof MembersRoute
   '/procurement': typeof ProcurementRoute
   '/reports': typeof ReportsRoute
+  '/scanner': typeof ScannerRoute
   '/settings': typeof SettingsRoute
   '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
   '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
@@ -195,11 +211,13 @@ export interface FileRoutesById {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/meal-summary': typeof MealSummaryRoute
+  '/member-pass': typeof MemberPassRoute
   '/members': typeof MembersRoute
   '/procurement': typeof ProcurementRoute
   '/procurement-pos': typeof ProcurementPosRouteWithChildren
   '/procurement-vendors': typeof ProcurementVendorsRouteWithChildren
   '/reports': typeof ReportsRoute
+  '/scanner': typeof ScannerRoute
   '/settings': typeof SettingsRoute
   '/procurement-pos/$poId': typeof ProcurementPosPoIdRoute
   '/procurement-vendors/$vendorId': typeof ProcurementVendorsVendorIdRoute
@@ -220,11 +238,13 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/meal-summary'
+    | '/member-pass'
     | '/members'
     | '/procurement'
     | '/procurement-pos'
     | '/procurement-vendors'
     | '/reports'
+    | '/scanner'
     | '/settings'
     | '/procurement-pos/$poId'
     | '/procurement-vendors/$vendorId'
@@ -243,9 +263,11 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/meal-summary'
+    | '/member-pass'
     | '/members'
     | '/procurement'
     | '/reports'
+    | '/scanner'
     | '/settings'
     | '/procurement-pos/$poId'
     | '/procurement-vendors/$vendorId'
@@ -264,11 +286,13 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/meal-summary'
+    | '/member-pass'
     | '/members'
     | '/procurement'
     | '/procurement-pos'
     | '/procurement-vendors'
     | '/reports'
+    | '/scanner'
     | '/settings'
     | '/procurement-pos/$poId'
     | '/procurement-vendors/$vendorId'
@@ -288,11 +312,13 @@ export interface RootRouteChildren {
   InventoryRoute: typeof InventoryRoute
   LoginRoute: typeof LoginRoute
   MealSummaryRoute: typeof MealSummaryRoute
+  MemberPassRoute: typeof MemberPassRoute
   MembersRoute: typeof MembersRoute
   ProcurementRoute: typeof ProcurementRoute
   ProcurementPosRoute: typeof ProcurementPosRouteWithChildren
   ProcurementVendorsRoute: typeof ProcurementVendorsRouteWithChildren
   ReportsRoute: typeof ReportsRoute
+  ScannerRoute: typeof ScannerRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -303,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scanner': {
+      id: '/scanner'
+      path: '/scanner'
+      fullPath: '/scanner'
+      preLoaderRoute: typeof ScannerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -338,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/members'
       fullPath: '/members'
       preLoaderRoute: typeof MembersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/member-pass': {
+      id: '/member-pass'
+      path: '/member-pass'
+      fullPath: '/member-pass'
+      preLoaderRoute: typeof MemberPassRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meal-summary': {
@@ -487,11 +527,13 @@ const rootRouteChildren: RootRouteChildren = {
   InventoryRoute: InventoryRoute,
   LoginRoute: LoginRoute,
   MealSummaryRoute: MealSummaryRoute,
+  MemberPassRoute: MemberPassRoute,
   MembersRoute: MembersRoute,
   ProcurementRoute: ProcurementRoute,
   ProcurementPosRoute: ProcurementPosRouteWithChildren,
   ProcurementVendorsRoute: ProcurementVendorsRouteWithChildren,
   ReportsRoute: ReportsRoute,
+  ScannerRoute: ScannerRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
