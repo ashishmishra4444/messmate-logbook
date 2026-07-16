@@ -88,7 +88,6 @@ export function MealSessionsAdmin() {
                 <SelectItem value="breakfast">Breakfast</SelectItem>
                 <SelectItem value="lunch">Lunch</SelectItem>
                 <SelectItem value="dinner">Dinner</SelectItem>
-                <SelectItem value="snack">Snack</SelectItem>
               </SelectContent>
             </Select>
           </div>

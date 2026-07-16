@@ -101,6 +101,7 @@ serve(async (req) => {
     const { data: insertData, error: insertError } = await supabase
       .from('attendance')
       .insert({
+        user_id: memberId,
         member_id: memberData.id,
         date: new Date().toISOString().split('T')[0],
         meal_session_id: activeSession.id,
@@ -119,7 +120,7 @@ serve(async (req) => {
         // Fetch the existing record to provide the "Better Duplicate Response"
         const { data: existing } = await supabase
           .from('attendance')
-          .select('scanned_at, scanner_name, meal_sessions(meal_type)')
+          .select('scanned_at, scanner_name')
           .eq('member_id', memberData.id)
           .eq('meal_session_id', activeSession.id)
           .single();
@@ -128,10 +129,10 @@ serve(async (req) => {
           JSON.stringify({ 
             status: "rejected", 
             reason: "duplicate",
-            message: `Already scanned at ${new Date(existing?.scanned_at).toLocaleTimeString()}`,
+            message: existing?.scanned_at ? `Already scanned at ${new Date(existing.scanned_at).toLocaleTimeString()}` : "Already scanned",
             details: {
               time: existing?.scanned_at,
-              session: existing?.meal_sessions?.meal_type || activeSession.meal_type,
+              session: activeSession.meal_type,
               scanner: existing?.scanner_name
             }
           }), 
